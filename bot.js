@@ -253,14 +253,16 @@ function baseEmbed() {
 }
 
 // fire and forget log to the configured log channel (set with /setlogchannel)
-function sendBotLog(guild, embed) {
+function sendBotLog(guild, payload) {
   try {
     if (!guild) return
     const cfg = loadJSON(path.join(__dirname, 'config.json'))
     if (!cfg.logChannelId) return
     const ch = guild.channels.cache.get(cfg.logChannelId)
     if (!ch) return
-    ch.send({ embeds: [embed] }).catch(() => {})
+    // accept either a plain string or an embed — keeps callers simple
+    if (typeof payload === 'string') ch.send({ content: payload }).catch(() => {})
+    else ch.send({ embeds: [payload] }).catch(() => {})
   } catch {}
 }
 
@@ -2520,7 +2522,7 @@ const slashCommands = [
     .setIntegrationTypes(ALL_INSTALLS).setContexts(ALL_CONTEXTS)
     .addRoleOption(o => o.setName('role').setDescription('role to give verified users').setRequired(true)),
 
-  new SlashCommandBuilder().setName('setuptickets').setDescription('Send a ticket panel embed to a channel')
+  new SlashCommandBuilder().setName('setuptickets').setDescription('Send a ticket panel to a channel')
     .setIntegrationTypes(ALL_INSTALLS).setContexts(ALL_CONTEXTS)
     .addChannelOption(o => o.setName('channel').setDescription('channel for the panel').setRequired(true))
     .addStringOption(o => o.setName('type').setDescription('what the panel offers (default: both)').setRequired(false)
@@ -2529,12 +2531,10 @@ const slashCommands = [
         { name: 'tag only',          value: 'tag' },
         { name: 'both',              value: 'both' },
       ))
-    .addStringOption(o => o.setName('title').setDescription('custom panel title — replaces the default').setRequired(false))
-    .addStringOption(o => o.setName('description').setDescription('custom panel description — replaces the default').setRequired(false))
-    .addStringOption(o => o.setName('footer').setDescription('text to show in the embed footer (optional)').setRequired(false))
-    .addStringOption(o => o.setName('color').setDescription('embed sidebar color as a hex code e.g. 4A0E0E (default: dark red)').setRequired(false))
-    .addStringOption(o => o.setName('kanji').setDescription('kanji character shown before the title (default: 承 for verif, 印 for tag, 門 for both)').setRequired(false))
-    .addStringOption(o => o.setName('placeholder').setDescription('dropdown placeholder text (default: open a ticket...)').setRequired(false)),
+    .addStringOption(o => o.setName('title').setDescription('override the default title').setRequired(false))
+    .addStringOption(o => o.setName('description').setDescription('override the default description').setRequired(false))
+    .addStringOption(o => o.setName('color').setDescription('hex color e.g. 4A0E0E (default: dark red)').setRequired(false))
+    .addStringOption(o => o.setName('placeholder').setDescription('dropdown placeholder text').setRequired(false)),
 
   new SlashCommandBuilder().setName('closeticket').setDescription('Close and delete the current ticket channel')
     .setIntegrationTypes(ALL_INSTALLS).setContexts(ALL_CONTEXTS),
@@ -2610,59 +2610,10 @@ const slashCommands = [
     .addStringOption(o => o.setName('action').setDescription('reset to default').setRequired(false)
       .addChoices({ name: 'reset', value: 'reset' })),
 
-  // bridged: prefix only commands exposed as slash with a single `args` string.
-  // discord caps total slash commands at 100, so this list is kept short. the bridged commands are forwarded to slash handlers.
-  ...[
-    // roblox / verification / group management
-    'register', 'pregister', 'verify', 'registeredlist', 'linked',
-    'flag', 'unflag', 'flagged',
-    'rom', 'setupraidpoints', 'setraidreview',
-    'raidpoints', 'rp', 'removepoint', 'grouprank',
-    'rollcall', 'endrollcall', 'whoisin', 'activitycheck',
-    // moderation extras
-    'lb', 'warns',
-    'antinuke', 'backup',
-    'tempban', 'lockdown', 'unlockdown', 'massban', 'modlogs', 'slowmode', 'note', 'notes',
-    'snipe', 'avatar', 'serverinfo', 'userinfo', 'afk',
-    'poll',
-    'welcome', 'rolemenu', 'giveaway',
-    'antilink', 'antispam', 'antiinvite',
-    // channel management
-    'createchannel', 'delchannel', 'clonechannel', 'renamechannel',
-    'hidechannel', 'unhidechannel', 'settopic', 'archivechannel',
-    'pin', 'unpin',
-    // voice
-    'vckick', 'vcmove', 'vcmute', 'vcunmute', 'vcdeafen', 'vcundeafen',
-    'vclimit', 'vcname', 'vctotal', 'vcdisconnectall',
-    // role management
-    'createrole', 'delrole', 'rolecolor', 'rolename', 'rolepos',
-    'rolehoist', 'rolemention', 'rolemembers', 'allroles', 'removeallroles',
-    // info
-    'ping', 'uptime', 'botinfo', 'members', 'online', 'bots', 'humans',
-    'roleinfo', 'channelinfo', 'emoji', 'emojis', 'servericon', 'banner',
-    'invites', 'permissions', 'inviteinfo', 'firstmsg', 'msgcount',
-    'roles', 'usercount',
-    // logging
-    'setjoinlog', 'setleavelog', 'setvoicelog', 'setmsglog', 'logsoff',
-    // reaction roles
-    'rradd', 'rrremove', 'rrlist', 'rrclear', 'rrpost',
-    // custom commands
-    'ccadd', 'ccdel', 'cclist', 'ccedit', 'ccshow',
-    // embeds
-    'embed', 'embedjson', 'embededit', 'embedfield', 'embedcolor',
-    // stats
-    'invitelb',
-    // nicknames + extra mod
-    'nick', 'resetnick', 'nickall',
-    'softban', 'tempmute', 'cases', 'case', 'delcase',
-    'say',
-    // purge variants (kept the useful ones, removed redundant ones)
-    'purgebot', 'purgeuser', 'purgematch', 'purgelinks',
-  ].map(name =>
-    new SlashCommandBuilder().setName(name).setDescription(`${name} command (use args for arguments)`)
-      .setIntegrationTypes(ALL_INSTALLS).setContexts(ALL_CONTEXTS)
-      .addStringOption(o => o.setName('args').setDescription('arguments (same as the prefix command)').setRequired(false))
-  ),
+  // bridged prefix-only slash commands removed — discord caps total slash
+  // commands at 130, and the explicit list above already exceeds that when
+  // combined with bridges. use `/cmd <name> <args>` to run any prefix command
+  // that doesn't have its own slash entry (e.g. /cmd ping, /cmd snipe).
   // /cmd lets you run any prefix only command that didn't get its own slash.
   // useful for things like .editsnipe, .drag, .cleanup, etc.
   new SlashCommandBuilder().setName('cmd').setDescription('run any prefix only command')
@@ -5312,47 +5263,36 @@ async function dispatchSlashInner(interaction) {
     return interaction.reply(`verify role set — verified users will receive ${role}`);
   }
 
-  // /setuptickets — sends the ticket panel to a channel, can be verification only, tag only, or both
+  // /setuptickets — sends the ticket panel to a channel.
+  // panel can offer verification tickets, tag tickets, or both (default).
   if (commandName === 'setuptickets') {
     if (!guild) return interaction.reply({ content: 'server only', ephemeral: true });
     if (!canUseAny(interaction.user.id))
-      return interaction.reply({ embeds: [errorEmbed('no permission').setDescription('only whitelist managers can use `/setuptickets`')], ephemeral: true });
+      return interaction.reply({ content: 'only whitelist managers can use /setuptickets', ephemeral: true });
     const ch = interaction.options.getChannel('channel');
     const rawType = (interaction.options.getString('type') || 'both').toLowerCase();
     const kind = ['verification', 'tag', 'both'].includes(rawType) ? rawType : 'both';
-    if (ch.type !== ChannelType.GuildText) return interaction.reply({ embeds: [errorEmbed('bad channel').setDescription('pick a text channel')], ephemeral: true });
+    if (ch.type !== ChannelType.GuildText) return interaction.reply({ content: 'pick a text channel', ephemeral: true });
 
-    // default kanji + text for each panel type
-    const defaultKanji = { verification: '承', tag: '印', both: '門' };
-    const defaults = {
-      verification: { desc: 'before u open a ticket make sure to join the roblox group\n\ntickets without ur actual roblox username will be closed' },
-      tag:          { desc: 'open a ticket to request a roblox tag\n\na whitelisted user will approve it inside the ticket before it gets applied' },
-      both:         { desc: 'before u open a ticket make sure to join the roblox group\n\ntickets without ur actual roblox username will be closed' },
-    };
-
-    // pull all the customization options (all optional — defaults look like the screenshot)
-    const kanji       = interaction.options.getString('kanji')       || defaultKanji[kind];
-    const customTitle = interaction.options.getString('title');
-    const title       = customTitle || `${kanji}  ${kind === 'both' ? 'tickets' : kind}`;
-    const description = interaction.options.getString('description') || defaults[kind].desc;
-    const footer      = interaction.options.getString('footer')      || null;
+    // panel content — admins can override any of these via the slash options
+    const title       = interaction.options.getString('title') || 'ぞメtickets';
+    const description = interaction.options.getString('description')
+      || 'before u open a ticket make sure to join the roblox group.\n\ntickets without ur actual roblox username will be closed';
     const placeholder = interaction.options.getString('placeholder') || 'open a ticket...';
 
-    // parse custom color — strip # if they included it, fall back to dark red
-    const rawColor  = interaction.options.getString('color');
-    let panelColor  = 0x4A0E0E;
+    // optional custom hex color — strip the # if they included it
+    const rawColor = interaction.options.getString('color');
+    let panelColor = 0x4A0E0E;
     if (rawColor) {
       const parsed = parseInt(rawColor.replace('#', ''), 16);
       if (!isNaN(parsed)) panelColor = parsed;
     }
 
-    // build the embed — always keep the sidebar style, just swap the text
-    const panel = baseEmbed()
+    // keep the panel embed simple — just title + description, no footer / no extras
+    const panel = new EmbedBuilder()
       .setColor(panelColor)
       .setTitle(title)
       .setDescription(description);
-
-    if (footer) panel.setFooter({ text: footer });
 
     const menuOptions = [];
     if (kind === 'verification' || kind === 'both') {
@@ -5368,27 +5308,27 @@ async function dispatchSlashInner(interaction) {
     const row = new ActionRowBuilder().addComponents(menu);
     try {
       await ch.send({ embeds: [panel], components: [row] });
-      return interaction.reply({ content: `ticket panel sent to ${ch} (type: \`${kind}\`)`, ephemeral: true });
+      return interaction.reply({ content: `ticket panel sent to ${ch}`, ephemeral: true });
     } catch {
-      return interaction.reply({ embeds: [errorEmbed('failed').setDescription("couldn't send to that channel — check my permissions")], ephemeral: true });
+      return interaction.reply({ content: "couldn't send to that channel — check my permissions", ephemeral: true });
     }
   }
 
-  // /closeticket
+  // /closeticket — closes the current ticket channel after a short delay
   if (commandName === 'closeticket') {
     if (!guild) return interaction.reply({ content: 'server only', ephemeral: true });
     const tickets = loadTickets();
     const t = tickets[interaction.channel.id];
-    if (!t) return interaction.reply({ embeds: [errorEmbed('not a ticket').setDescription('this isn\'t a ticket channel')], ephemeral: true });
+    if (!t) return interaction.reply({ content: "this isn't a ticket channel", ephemeral: true });
     const support = loadTicketSupport();
     const allowed = isWlManager(interaction.user.id) || interaction.member.roles.cache.some(r => support.includes(r.id)) || t.userId === interaction.user.id;
-    if (!allowed) return interaction.reply({ embeds: [errorEmbed('no permission').setDescription('only the ticket opener, support roles, or wl managers can close this')], ephemeral: true });
+    if (!allowed) return interaction.reply({ content: 'only the ticket opener, support roles, or wl managers can close this', ephemeral: true });
     await interaction.reply({ content: 'closing this ticket in 5s...' });
     delete tickets[interaction.channel.id]; saveTickets(tickets);
     setTimeout(async () => {
       try { await interaction.channel.delete('ticket closed'); } catch {}
     }, 5000);
-    sendBotLog(guild, baseEmbed().setColor(0x2C2F33).setTitle('ticket closed').setDescription(`<#${interaction.channel.id}> (${interaction.channel.name}) closed by ${interaction.user.tag}`));
+    sendBotLog(guild, `ticket closed: #${interaction.channel.name} closed by ${interaction.user.tag}`);
     return;
   }
 
@@ -10061,43 +10001,112 @@ async function dispatchPrefixInner(message) {
     } catch {}
   });
 
+  // shared helper: figure out which role (if any) a reaction maps to.
+  // returns { guild, member, role } or null if nothing should happen.
+  async function resolveReactionRole(reaction, user) {
+    if (user.bot) return null;
+    if (reaction.partial) {
+      try { await reaction.fetch(); }
+      catch (err) { console.error('[rr] failed to fetch partial reaction:', err.message); return null; }
+    }
+    if (reaction.message.partial) {
+      try { await reaction.message.fetch(); }
+      catch (err) { console.error('[rr] failed to fetch partial message:', err.message); return null; }
+    }
+    const guild = reaction.message.guild;
+    if (!guild) return null;
+    const rrAll = loadReactionRoles();
+    const entry = rrAll[reaction.message.id];
+    if (!entry) return null;
+    // map can be stored under .map (new) or directly on the entry (old layout).
+    // also accept storage by emoji id, full <:name:id> form, or unicode name.
+    const map = entry.map || entry;
+    const emoji = reaction.emoji;
+    const candidates = [
+      emoji.id,
+      emoji.name,
+      emoji.id ? `<${emoji.animated ? 'a' : ''}:${emoji.name}:${emoji.id}>` : null,
+    ].filter(Boolean);
+    let roleId = null;
+    for (const k of candidates) {
+      if (typeof map[k] === 'string') { roleId = map[k]; break; }
+    }
+    if (!roleId) return null;
+    const role = guild.roles.cache.get(roleId) || await guild.roles.fetch(roleId).catch(() => null);
+    if (!role) {
+      console.error(`[rr] role ${roleId} no longer exists in guild ${guild.id}`);
+      return null;
+    }
+    const member = await guild.members.fetch(user.id).catch(err => {
+      console.error('[rr] failed to fetch member:', err.message);
+      return null;
+    });
+    if (!member) return null;
+    return { guild, member, role, user };
+  }
+
+  // dm the reactor when we know exactly why a role couldn't be granted —
+  // way easier to debug than silent failures in the bot console.
+  async function notifyReactionRoleFailure(user, guild, role, reason) {
+    try {
+      await user.send(
+        `couldn't give you the **${role.name}** role in **${guild.name}** — ${reason}.\n` +
+        `ask a server admin to fix this (the bot probably needs Manage Roles, ` +
+        `or its highest role needs to sit above **${role.name}**).`
+      );
+    } catch {}
+  }
+
   client.on('messageReactionAdd', async (reaction, user) => {
     try {
-      if (user.bot) return;
-      if (reaction.partial) { try { await reaction.fetch() } catch { return } }
-      if (reaction.message.partial) { try { await reaction.message.fetch() } catch { return } }
-      const guild = reaction.message.guild;
-      if (!guild) return;
-      const rrAll = loadReactionRoles();
-      const m = rrAll[reaction.message.id];
-      if (!m) return;
-      const emojiKey = reaction.emoji.id || reaction.emoji.name;
-      // support both storage layouts: m.map[key] (new) and m[key] (old)
-      const roleId = m.map?.[emojiKey] || m[emojiKey];
-      if (!roleId || typeof roleId !== 'string') return;
-      const member = await guild.members.fetch(user.id).catch(() => null);
-      if (member) {
-        await member.roles.add(roleId).catch(err => console.error('[rr] add role failed:', err.message));
+      const ctx = await resolveReactionRole(reaction, user);
+      if (!ctx) return;
+      const { guild, member, role } = ctx;
+      // already has it — nothing to do
+      if (member.roles.cache.has(role.id)) return;
+      // pre-flight checks so we can give the user a real reason instead of failing silently
+      const me = guild.members.me || await guild.members.fetchMe().catch(() => null);
+      if (!me) {
+        console.error('[rr] could not resolve bot member in guild', guild.id);
+        return;
+      }
+      if (!me.permissions.has(PermissionsBitField.Flags.ManageRoles)) {
+        console.error('[rr] missing Manage Roles permission in guild', guild.id);
+        await notifyReactionRoleFailure(user, guild, role, 'i am missing the **Manage Roles** permission');
+        return;
+      }
+      if (role.managed) {
+        console.error(`[rr] role ${role.id} is managed (bot/integration role) — cannot assign`);
+        await notifyReactionRoleFailure(user, guild, role, 'that role is managed by an integration and cannot be given out');
+        return;
+      }
+      if (role.comparePositionTo(me.roles.highest) >= 0) {
+        console.error(`[rr] role ${role.id} (${role.name}) is at or above bot's highest role`);
+        await notifyReactionRoleFailure(user, guild, role, 'that role sits above my highest role in the role list');
+        return;
+      }
+      try {
+        await member.roles.add(role.id, 'reaction role');
+      } catch (err) {
+        console.error('[rr] add role failed:', err.message);
+        await notifyReactionRoleFailure(user, guild, role, `discord refused: ${err.message}`);
       }
     } catch (err) { console.error('[rr] reactionAdd error:', err.message); }
   });
 
   client.on('messageReactionRemove', async (reaction, user) => {
     try {
-      if (user.bot) return;
-      if (reaction.partial) { try { await reaction.fetch() } catch { return } }
-      if (reaction.message.partial) { try { await reaction.message.fetch() } catch { return } }
-      const guild = reaction.message.guild;
-      if (!guild) return;
-      const rrAll = loadReactionRoles();
-      const m = rrAll[reaction.message.id];
-      if (!m) return;
-      const emojiKey = reaction.emoji.id || reaction.emoji.name;
-      const roleId = m.map?.[emojiKey] || m[emojiKey];
-      if (!roleId || typeof roleId !== 'string') return;
-      const member = await guild.members.fetch(user.id).catch(() => null);
-      if (member) {
-        await member.roles.remove(roleId).catch(err => console.error('[rr] remove role failed:', err.message));
+      const ctx = await resolveReactionRole(reaction, user);
+      if (!ctx) return;
+      const { guild, member, role } = ctx;
+      if (!member.roles.cache.has(role.id)) return;
+      const me = guild.members.me || await guild.members.fetchMe().catch(() => null);
+      if (!me || !me.permissions.has(PermissionsBitField.Flags.ManageRoles)) return;
+      if (role.managed || role.comparePositionTo(me.roles.highest) >= 0) return;
+      try {
+        await member.roles.remove(role.id, 'reaction role removed');
+      } catch (err) {
+        console.error('[rr] remove role failed:', err.message);
       }
     } catch (err) { console.error('[rr] reactionRemove error:', err.message); }
   });
