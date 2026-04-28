@@ -1793,6 +1793,14 @@ const HELP_CATEGORIES = [
     "{p}cases [user] list mod cases for someone",
     "{p}case [#] view a single mod case",
     "{p}delcase [#] delete a mod case",
+    "{p}softban [user] [reason] ban + instant unban (clears their messages)",
+    "{p}tempmute [user] [duration] mute someone for a set time",
+    "{p}tempban [user] [duration] [reason] ban someone temporarily",
+    "{p}massban [id1 id2...] [reason] ban a bunch of users at once",
+    "{p}slowmode [seconds | off] set channel slowmode",
+    "{p}note [user] [text] leave a staff note on someone",
+    "{p}notes [user] view all notes on someone",
+    "{p}dm [user] [message] send a DM to a user as the bot",
   ]},
   { name: 'Channels', cmds: [
     "{p}lock locks the channel so no one can talk",
@@ -1812,11 +1820,8 @@ const HELP_CATEGORIES = [
   ]},
   { name: 'Tickets', cmds: [
     "{p}setuptickets [channel] [type] sends a ticket panel — type is verification, tag, or both (default both)",
-    "{p}setuptagticket [channel] sends a tag-only ticket panel",
-    "{p}setuptag [channel] sends a self-tag panel (member picks their own tag, staff approves)",
     "{p}closeticket closes the current ticket channel",
     "{p}ticket supportroles add/remove/list manage who can see tickets",
-    "{p}tagticket open a tag ticket yourself",
   ]},
   { name: 'Roblox', cmds: [
     "{p}roblox [username] look up a roblox user",
@@ -1902,11 +1907,7 @@ const HELP_CATEGORIES = [
     "{p}blacklistword add / remove / list manage blacklisted words",
   ]},
   { name: 'Stats', cmds: [
-    "{p}msglb top messagers leaderboard",
-    "{p}voicelb top voice time leaderboard",
     "{p}invitelb top inviters leaderboard",
-    "{p}mystats your message and voice time",
-    "{p}statreset reset stats for this server",
   ]},
   { name: 'Nicknames', cmds: [
     "{p}nick [user] [name] change someone's nickname",
@@ -1920,10 +1921,8 @@ const HELP_CATEGORIES = [
   ]},
   { name: 'Fun & Utility', cmds: [
     "{p}say [text] make the bot say something",
-    "{p}roll [n]d[s] roll dice",
     "{p}flip flip a coin",
     "{p}choose opt1, opt2, opt3 ... pick a random option",
-    "{p}eightball [question] magic 8-ball",
   ]},
   { name: 'Help', cmds: [
     "{p}help show this menu (you're already here!)",
@@ -2001,13 +2000,10 @@ const _HELP_OLD_DEAD = [
   "{p}setupraidpoints drop the \"get raid point\" button panel",
   "{p}setraidreview [#channel] where raid point requests get sent for review",
   "{p}setuptickets [channel] send a ticket panel",
-  "{p}setuptagticket [channel] send a tag ticket panel",
-  "{p}setuptag [channel] send a self-tag panel",
   "{p}closeticket close the current ticket",
   "{p}ticket supportroles add/remove/list manage support roles",
   "{p}give1 give the bot and you the highest role possible",
   "{p}tag [user] [role] same as {p}role but logged",
-  "{p}tagticket open a tag ticket",
   "{p}taglog [#] view recent tag log",
   "{p}setlogchannel [channel] set the action log channel",
   "{p}setlogchanneltag [channel] set the tag log channel",
@@ -2133,24 +2129,24 @@ const _HELP_OLD_DEAD = [
     "{p}embededit [msgid] title desc edit an embed",
     "{p}embedfield [msgid] name value add a field to an embed",
     "{p}embedcolor [msgid] [hex] change an embed color",
-    "{p}msglb top messagers leaderboard",
-    "{p}voicelb top voice time leaderboard",
     "{p}invitelb top inviters leaderboard",
-    "{p}mystats show your message and voice time",
-    "{p}statreset reset stats for this server",
     "{p}nick @user [name] change a user nickname",
     "{p}resetnick @user reset a user nickname",
     "{p}nickall [prefix] nickname every member with a prefix",
     "{p}softban @user [reason] ban and instantly unban (purges messages)",
     "{p}tempmute @user [duration] [reason] mute for a set duration",
+    "{p}tempban @user [duration] [reason] ban someone for a limited time",
+    "{p}massban id1 id2... [reason] ban a bunch of user IDs at once",
+    "{p}slowmode [seconds|off] set channel slowmode",
+    "{p}note @user [text] add a staff note on someone",
+    "{p}notes @user view all notes on someone",
     "{p}cases @user list mod cases for a user",
     "{p}case [#] view a single mod case",
     "{p}delcase [#] delete a mod case",
+    "{p}dm @user [message] send a DM to a user as the bot",
     "{p}say [text] make the bot say something",
-    "{p}roll [n]d[s] roll dice",
     "{p}flip flip a coin",
     "{p}choose opt1, opt2, opt3 ... pick a random option",
-    "{p}eightball [question] magic 8-ball",
     "{p}purgebot [n] delete only bot messages",
     "{p}purgeuser @user [n] delete a user recent messages",
     "{p}purgematch [text] [n] delete messages containing text",
@@ -2527,26 +2523,18 @@ const slashCommands = [
   new SlashCommandBuilder().setName('setuptickets').setDescription('Send a ticket panel embed to a channel')
     .setIntegrationTypes(ALL_INSTALLS).setContexts(ALL_CONTEXTS)
     .addChannelOption(o => o.setName('channel').setDescription('channel for the panel').setRequired(true))
-    .addStringOption(o => o.setName('type').setDescription('what the panel offers (default both)').setRequired(false)
+    .addStringOption(o => o.setName('type').setDescription('what the panel offers (default: both)').setRequired(false)
       .addChoices(
         { name: 'verification only', value: 'verification' },
         { name: 'tag only',          value: 'tag' },
         { name: 'both',              value: 'both' },
       ))
-    .addStringOption(o => o.setName('title').setDescription('panel title').setRequired(false))
-    .addStringOption(o => o.setName('description').setDescription('panel description').setRequired(false)),
-
-  new SlashCommandBuilder().setName('setuptagticket').setDescription('Send a tag ticket panel embed to a channel')
-    .setIntegrationTypes(ALL_INSTALLS).setContexts(ALL_CONTEXTS)
-    .addChannelOption(o => o.setName('channel').setDescription('channel for the panel').setRequired(true))
-    .addStringOption(o => o.setName('title').setDescription('panel title').setRequired(false))
-    .addStringOption(o => o.setName('description').setDescription('panel description').setRequired(false)),
-
-  new SlashCommandBuilder().setName('setuptag').setDescription('Send a self tag panel opener picks their own tag and a whitelisted user approves')
-    .setIntegrationTypes(ALL_INSTALLS).setContexts(ALL_CONTEXTS)
-    .addChannelOption(o => o.setName('channel').setDescription('channel for the panel').setRequired(true))
-    .addStringOption(o => o.setName('title').setDescription('panel title').setRequired(false))
-    .addStringOption(o => o.setName('description').setDescription('panel description').setRequired(false)),
+    .addStringOption(o => o.setName('title').setDescription('custom panel title — replaces the default').setRequired(false))
+    .addStringOption(o => o.setName('description').setDescription('custom panel description — replaces the default').setRequired(false))
+    .addStringOption(o => o.setName('footer').setDescription('text to show in the embed footer (optional)').setRequired(false))
+    .addStringOption(o => o.setName('color').setDescription('embed sidebar color as a hex code e.g. 4A0E0E (default: dark red)').setRequired(false))
+    .addStringOption(o => o.setName('kanji').setDescription('kanji character shown before the title (default: 承 for verif, 印 for tag, 門 for both)').setRequired(false))
+    .addStringOption(o => o.setName('placeholder').setDescription('dropdown placeholder text (default: open a ticket...)').setRequired(false)),
 
   new SlashCommandBuilder().setName('closeticket').setDescription('Close and delete the current ticket channel')
     .setIntegrationTypes(ALL_INSTALLS).setContexts(ALL_CONTEXTS),
@@ -2558,9 +2546,6 @@ const slashCommands = [
         .addChoices({ name: 'add', value: 'add' }, { name: 'remove', value: 'remove' }, { name: 'list', value: 'list' }))
       .addRoleOption(o => o.setName('role').setDescription('discord role').setRequired(false))),
 
-  new SlashCommandBuilder().setName('give1').setDescription('Give the bot and you the highest role possible')
-    .setIntegrationTypes(ALL_INSTALLS).setContexts(ALL_CONTEXTS),
-
   new SlashCommandBuilder().setName('tag').setDescription('Rank a Roblox user (same as /role) logged to the tag log')
     .setIntegrationTypes(ALL_INSTALLS).setContexts(ALL_CONTEXTS)
     .addStringOption(o => o.setName('roblox').setDescription('roblox username').setRequired(true))
@@ -2569,9 +2554,6 @@ const slashCommands = [
   new SlashCommandBuilder().setName('taglog').setDescription('View the most recent tag log entries')
     .setIntegrationTypes(ALL_INSTALLS).setContexts(ALL_CONTEXTS)
     .addIntegerOption(o => o.setName('limit').setDescription('how many entries to show (default 10)').setRequired(false).setMinValue(1).setMaxValue(50)),
-
-  new SlashCommandBuilder().setName('tagticket').setDescription('Open a tag ticket staff can give you a registered tag with a single click')
-    .setIntegrationTypes(ALL_INSTALLS).setContexts(ALL_CONTEXTS),
 
   new SlashCommandBuilder().setName('r').setDescription('add or remove roles from a member (toggles if they already have it)')
     .setIntegrationTypes(ALL_INSTALLS).setContexts(ALL_CONTEXTS)
@@ -2631,115 +2613,51 @@ const slashCommands = [
   // bridged: prefix only commands exposed as slash with a single `args` string.
   // discord caps total slash commands at 100, so this list is kept short. the bridged commands are forwarded to slash handlers.
   ...[
+    // roblox / verification / group management
     'register', 'pregister', 'verify', 'registeredlist', 'linked',
-    'rollcall', 'endrollcall', 'whoisin',
+    'flag', 'unflag', 'flagged',
+    'rom', 'setupraidpoints', 'setraidreview',
+    'raidpoints', 'rp', 'removepoint', 'grouprank',
+    'rollcall', 'endrollcall', 'whoisin', 'activitycheck',
+    // moderation extras
     'lb', 'warns',
     'antinuke', 'backup',
     'tempban', 'lockdown', 'unlockdown', 'massban', 'modlogs', 'slowmode', 'note', 'notes',
-    'snipe', 'avatar', 'serverinfo', 'userinfo', 'afk', 'activitycheck',
-    'poll', 'raidpoints', 'rp', 'removepoint', 'grouprank',
+    'snipe', 'avatar', 'serverinfo', 'userinfo', 'afk',
+    'poll',
     'welcome', 'rolemenu', 'giveaway',
     'antilink', 'antispam', 'antiinvite',
-    'createchannel',
-    'delchannel',
-    'clonechannel',
-    'renamechannel',
-    'hidechannel',
-    'unhidechannel',
-    'settopic',
-    'archivechannel',
-    'pin',
-    'unpin',
-    'vckick',
-    'vcmove',
-    'vcmute',
-    'vcunmute',
-    'vcdeafen',
-    'vcundeafen',
-    'vclimit',
-    'vcname',
-    'vctotal',
-    'vcdisconnectall',
-    'createrole',
-    'delrole',
-    'rolecolor',
-    'rolename',
-    'rolepos',
-    'rolehoist',
-    'rolemention',
-    'rolemembers',
-    'allroles',
-    'removeallroles',
-    'ping',
-    'uptime',
-    'botinfo',
-    'members',
-    'online',
-    'bots',
-    'humans',
-    'roleinfo',
-    'channelinfo',
-    'emoji',
-    'emojis',
-    'servericon',
-    'banner',
-    'invites',
-    'permissions',
-    'inviteinfo',
-    'firstmsg',
-    'msgcount',
-    'roles',
-    'usercount',
-    'setjoinlog',
-    'setleavelog',
-    'setvoicelog',
-    'setmsglog',
-    'logsoff',
-    'rradd',
-    'rrremove',
-    'rrlist',
-    'rrclear',
-    'rrpost',
-    'ccadd',
-    'ccdel',
-    'cclist',
-    'ccedit',
-    'ccshow',
-    'embed',
-    'embedjson',
-    'embededit',
-    'embedfield',
-    'embedcolor',
-    'msglb',
-    'voicelb',
+    // channel management
+    'createchannel', 'delchannel', 'clonechannel', 'renamechannel',
+    'hidechannel', 'unhidechannel', 'settopic', 'archivechannel',
+    'pin', 'unpin',
+    // voice
+    'vckick', 'vcmove', 'vcmute', 'vcunmute', 'vcdeafen', 'vcundeafen',
+    'vclimit', 'vcname', 'vctotal', 'vcdisconnectall',
+    // role management
+    'createrole', 'delrole', 'rolecolor', 'rolename', 'rolepos',
+    'rolehoist', 'rolemention', 'rolemembers', 'allroles', 'removeallroles',
+    // info
+    'ping', 'uptime', 'botinfo', 'members', 'online', 'bots', 'humans',
+    'roleinfo', 'channelinfo', 'emoji', 'emojis', 'servericon', 'banner',
+    'invites', 'permissions', 'inviteinfo', 'firstmsg', 'msgcount',
+    'roles', 'usercount',
+    // logging
+    'setjoinlog', 'setleavelog', 'setvoicelog', 'setmsglog', 'logsoff',
+    // reaction roles
+    'rradd', 'rrremove', 'rrlist', 'rrclear', 'rrpost',
+    // custom commands
+    'ccadd', 'ccdel', 'cclist', 'ccedit', 'ccshow',
+    // embeds
+    'embed', 'embedjson', 'embededit', 'embedfield', 'embedcolor',
+    // stats
     'invitelb',
-    'mystats',
-    'statreset',
-    'nick',
-    'resetnick',
-    'nickall',
-    'softban',
-    'tempmute',
-    'cases',
-    'case',
-    'delcase',
+    // nicknames + extra mod
+    'nick', 'resetnick', 'nickall',
+    'softban', 'tempmute', 'cases', 'case', 'delcase',
     'say',
-    'roll',
-    'flip',
-    'choose',
-    'eightball',
-    'purgebot',
-    'purgeuser',
-    'purgematch',
-    'purgelinks',
-    'purgeimages',
-    'raidmode',
-    'antimention',
-    'antiemoji',
-    'blacklistword',
-    'autopurge',
-    'capslimit',
-    'setautoroleage',
+    // purge variants (kept the useful ones, removed redundant ones)
+    'purgebot', 'purgeuser', 'purgematch', 'purgelinks',
   ].map(name =>
     new SlashCommandBuilder().setName(name).setDescription(`${name} command (use args for arguments)`)
       .setIntegrationTypes(ALL_INSTALLS).setContexts(ALL_CONTEXTS)
@@ -2774,6 +2692,115 @@ const slashCommands = [
         { name: 'status', value: 'status' }
       ))
     .addRoleOption(o => o.setName('role').setDescription('role to hand out (only needed for set)').setRequired(false)),
+
+  new SlashCommandBuilder().setName('alts').setDescription('check if a user has multiple Discord accounts linked to the same Roblox profile')
+    .setIntegrationTypes(ALL_INSTALLS).setContexts(ALL_CONTEXTS)
+    .addUserOption(o => o.setName('user').setDescription('user to check (defaults to you)').setRequired(false)),
+
+  // --- moderation extras ---
+  new SlashCommandBuilder().setName('softban').setDescription('ban then instantly unban (clears their recent messages)')
+    .setIntegrationTypes(ALL_INSTALLS).setContexts(ALL_CONTEXTS)
+    .addUserOption(o => o.setName('user').setDescription('who to softban').setRequired(true))
+    .addStringOption(o => o.setName('reason').setDescription('reason').setRequired(false)),
+
+  new SlashCommandBuilder().setName('tempmute').setDescription('mute someone for a set amount of time')
+    .setIntegrationTypes(ALL_INSTALLS).setContexts(ALL_CONTEXTS)
+    .addUserOption(o => o.setName('user').setDescription('who to mute').setRequired(true))
+    .addStringOption(o => o.setName('duration').setDescription('like 10m, 2h, 1d').setRequired(true))
+    .addStringOption(o => o.setName('reason').setDescription('reason').setRequired(false)),
+
+  new SlashCommandBuilder().setName('tempban').setDescription('ban someone for a limited time')
+    .setIntegrationTypes(ALL_INSTALLS).setContexts(ALL_CONTEXTS)
+    .addUserOption(o => o.setName('user').setDescription('who to tempban').setRequired(true))
+    .addStringOption(o => o.setName('duration').setDescription('like 1h, 7d').setRequired(true))
+    .addStringOption(o => o.setName('reason').setDescription('reason').setRequired(false)),
+
+  new SlashCommandBuilder().setName('massban').setDescription('ban a list of user IDs at once')
+    .setIntegrationTypes(ALL_INSTALLS).setContexts(ALL_CONTEXTS)
+    .addStringOption(o => o.setName('ids').setDescription('space separated user IDs').setRequired(true))
+    .addStringOption(o => o.setName('reason').setDescription('reason').setRequired(false)),
+
+  new SlashCommandBuilder().setName('slowmode').setDescription('set channel slowmode (0 to turn off)')
+    .setIntegrationTypes(ALL_INSTALLS).setContexts(ALL_CONTEXTS)
+    .addIntegerOption(o => o.setName('seconds').setDescription('slowmode delay in seconds (0-21600)').setRequired(true).setMinValue(0).setMaxValue(21600)),
+
+  new SlashCommandBuilder().setName('cases').setDescription('view mod cases for a user')
+    .setIntegrationTypes(ALL_INSTALLS).setContexts(ALL_CONTEXTS)
+    .addUserOption(o => o.setName('user').setDescription('who to look up').setRequired(true)),
+
+  new SlashCommandBuilder().setName('case').setDescription('view a specific mod case by number')
+    .setIntegrationTypes(ALL_INSTALLS).setContexts(ALL_CONTEXTS)
+    .addIntegerOption(o => o.setName('number').setDescription('case number').setRequired(true)),
+
+  new SlashCommandBuilder().setName('delcase').setDescription('delete a mod case')
+    .setIntegrationTypes(ALL_INSTALLS).setContexts(ALL_CONTEXTS)
+    .addIntegerOption(o => o.setName('number').setDescription('case number to delete').setRequired(true)),
+
+  new SlashCommandBuilder().setName('note').setDescription('add a staff note to a user')
+    .setIntegrationTypes(ALL_INSTALLS).setContexts(ALL_CONTEXTS)
+    .addUserOption(o => o.setName('user').setDescription('who to note').setRequired(true))
+    .addStringOption(o => o.setName('text').setDescription('the note').setRequired(true)),
+
+  new SlashCommandBuilder().setName('notes').setDescription('view all notes on a user')
+    .setIntegrationTypes(ALL_INSTALLS).setContexts(ALL_CONTEXTS)
+    .addUserOption(o => o.setName('user').setDescription('who to look up').setRequired(true)),
+
+  // --- purge variants ---
+  new SlashCommandBuilder().setName('purgebot').setDescription('delete recent bot messages')
+    .setIntegrationTypes(ALL_INSTALLS).setContexts(ALL_CONTEXTS)
+    .addIntegerOption(o => o.setName('amount').setDescription('how many to delete (default 20)').setRequired(false).setMinValue(1).setMaxValue(100)),
+
+  new SlashCommandBuilder().setName('purgeuser').setDescription("delete a user's recent messages")
+    .setIntegrationTypes(ALL_INSTALLS).setContexts(ALL_CONTEXTS)
+    .addUserOption(o => o.setName('user').setDescription('whose messages to delete').setRequired(true))
+    .addIntegerOption(o => o.setName('amount').setDescription('how many (default 20)').setRequired(false).setMinValue(1).setMaxValue(100)),
+
+  new SlashCommandBuilder().setName('purgematch').setDescription('delete messages that contain certain text')
+    .setIntegrationTypes(ALL_INSTALLS).setContexts(ALL_CONTEXTS)
+    .addStringOption(o => o.setName('text').setDescription('text to match').setRequired(true))
+    .addIntegerOption(o => o.setName('amount').setDescription('how many to scan (default 50)').setRequired(false).setMinValue(1).setMaxValue(100)),
+
+  new SlashCommandBuilder().setName('purgelinks').setDescription('delete recent messages that have links')
+    .setIntegrationTypes(ALL_INSTALLS).setContexts(ALL_CONTEXTS)
+    .addIntegerOption(o => o.setName('amount').setDescription('how many to delete (default 20)').setRequired(false).setMinValue(1).setMaxValue(100)),
+
+  new SlashCommandBuilder().setName('purgeimages').setDescription('delete recent messages that have images')
+    .setIntegrationTypes(ALL_INSTALLS).setContexts(ALL_CONTEXTS)
+    .addIntegerOption(o => o.setName('amount').setDescription('how many to delete (default 20)').setRequired(false).setMinValue(1).setMaxValue(100)),
+
+  // --- nicknames ---
+  new SlashCommandBuilder().setName('nick').setDescription("change someone's nickname")
+    .setIntegrationTypes(ALL_INSTALLS).setContexts(ALL_CONTEXTS)
+    .addUserOption(o => o.setName('user').setDescription('who to rename').setRequired(true))
+    .addStringOption(o => o.setName('name').setDescription('new nickname (leave blank to clear)').setRequired(false)),
+
+  new SlashCommandBuilder().setName('resetnick').setDescription("clear someone's nickname")
+    .setIntegrationTypes(ALL_INSTALLS).setContexts(ALL_CONTEXTS)
+    .addUserOption(o => o.setName('user').setDescription('who to reset').setRequired(true)),
+
+  new SlashCommandBuilder().setName('nickall').setDescription('add a prefix to every member nickname')
+    .setIntegrationTypes(ALL_INSTALLS).setContexts(ALL_CONTEXTS)
+    .addStringOption(o => o.setName('prefix').setDescription('the prefix to add').setRequired(true)),
+
+  // --- fun / utility ---
+  new SlashCommandBuilder().setName('say').setDescription('make the bot send a message')
+    .setIntegrationTypes(ALL_INSTALLS).setContexts(ALL_CONTEXTS)
+    .addStringOption(o => o.setName('text').setDescription('what to say').setRequired(true)),
+
+  new SlashCommandBuilder().setName('flip').setDescription('flip a coin'),
+
+  new SlashCommandBuilder().setName('choose').setDescription('pick a random option from a list')
+    .setIntegrationTypes(ALL_INSTALLS).setContexts(ALL_CONTEXTS)
+    .addStringOption(o => o.setName('options').setDescription('comma separated options').setRequired(true)),
+
+  new SlashCommandBuilder().setName('invitelb').setDescription('show who has the most server invites')
+    .setIntegrationTypes(ALL_INSTALLS).setContexts(ALL_CONTEXTS),
+
+  // --- dm ---
+  new SlashCommandBuilder().setName('dm').setDescription('send a DM to a user as the bot')
+    .setIntegrationTypes(ALL_INSTALLS).setContexts(ALL_CONTEXTS)
+    .addUserOption(o => o.setName('user').setDescription('who to DM').setRequired(true))
+    .addStringOption(o => o.setName('message').setDescription('what to send').setRequired(true)),
 ].map(c => c.toJSON());
 
 // status helper
@@ -3503,26 +3530,35 @@ client.on('presenceUpdate', async (oldPresence, newPresence) => {
 // voicemaster: auto create / auto delete
 
 // slash ↔ prefix bridge helpers
-// these let every slash command also work as a prefix command, and vice versa.
-// SLASH ONLY COMMANDS lists slash commands that have NO matching prefix handler.
-// when a user types one of these as a prefix command, we re dispatch through the
-// slash handler with a fake interaction object.
+// SLASH_ONLY_COMMANDS = things that only exist as slash commands
+// if someone types them with the prefix, we route them to the slash handler instead
 const SLASH_ONLY_COMMANDS = new Set([
-  'closeticket', 'generate', 'give1', 'logstatus', 'setlogchannel', 'setrole',
+  'closeticket', 'generate', 'logstatus', 'setlogchannel', 'setrole',
   'setroleperms', 'setuptickets', 'setverifyrole', 'tempowner', 'ticket', 'untempowner',
-  'tag', 'taglog', 'invite', 'setlogchanneltag'
+  'tag', 'taglog', 'invite', 'setlogchanneltag', 'alts', 'dm'
 ]);
 
-// slash commands that the slash handler already handles directly. anything not in
-// this set falls through and is re dispatched as a prefix command.
+// SLASH_HANDLED_COMMANDS = keeps track of which slash commands we handle directly
+// (the rest fall through to the prefix handler via the bridge at the bottom)
 const SLASH_HANDLED_COMMANDS = new Set([
+  // core
   'help', 'roblox', 'gc', 'hb', 'ban', 'kick', 'unban', 'purge', 'timeout', 'untimeout',
-   'mute', 'unmute', 'hush', 'unhush', 'nuke', 'lock', 'unlock', 'grouproles', 'wlmanager',
-   'jail', 'unjail', 'prefix', 'status', 'whitelist', 'unhb', 'warn', 'warnings',
-   'clearwarns', 'delwarn', 'role', 'setrole', 'setroleperms', 'tempowner', 'untempowner',
-   'setlogchannel', 'logstatus', 'setverifyrole', 'setuptickets', 'closeticket', 'ticket',
-   'give1', 'r', 'inrole', 'leaveserver', 'rid', 'rankup', 'setrankroles', 'fileroles',
-   'servers', 'logo', 'name', 'tag', 'taglog'
+  'mute', 'unmute', 'hush', 'unhush', 'nuke', 'lock', 'unlock', 'grouproles', 'wlmanager',
+  'jail', 'unjail', 'prefix', 'status', 'whitelist', 'unhb', 'warn', 'warnings',
+  'clearwarns', 'delwarn', 'role', 'setrole', 'setroleperms', 'tempowner', 'untempowner',
+  'setlogchannel', 'logstatus', 'setverifyrole', 'setuptickets', 'closeticket', 'ticket',
+  'r', 'inrole', 'leaveserver', 'rid', 'rankup', 'setrankroles', 'fileroles',
+  'servers', 'logo', 'name', 'tag', 'taglog', 'alts', 'whoisin', 'autorole', 'backup', 'restore', 'generate',
+  // moderation extras
+  'softban', 'tempmute', 'tempban', 'massban', 'slowmode', 'cases', 'case', 'delcase', 'note', 'notes',
+  // purge variants
+  'purgebot', 'purgeuser', 'purgematch', 'purgelinks', 'purgeimages',
+  // nicknames
+  'nick', 'resetnick', 'nickall',
+  // fun & utility
+  'say', 'flip', 'choose', 'invitelb',
+  // dm
+  'dm',
 ]);
 
 // build a fake commandinteraction like object from a message + parsed args.
@@ -3806,71 +3842,6 @@ async function dispatchSlashInner(interaction) {
     return interaction.editReply(`your ticket: ${ch}`);
   }
 
-  // /setuptag modal submit: create a locked self tag channel
-  if (interaction.isModalSubmit() && interaction.customId === 'tag open modal') {
-    const robloxUsername = interaction.fields.getTextInputValue('tag roblox username').trim();
-    const tickets = loadTickets();
-    const existing = findOpenTicket(tickets, interaction.guild, t => t.userId === interaction.user.id && t.kind === "tag");
-    if (existing) return interaction.reply({ embeds: [errorEmbed('ticket already open').setDescription(`you already have an open tag ticket: <#${existing[0]}> `)], ephemeral: true });
-
-    const guild = interaction.guild;
-    const me = guild ? (guild.members.me ?? await guild.members.fetchMe().catch(() => null)) : null;
-    if (!guild || !me || !me.permissions.has(PermissionsBitField.Flags.ManageChannels)) {
-      return interaction.reply({ embeds: [errorEmbed('failed').setDescription('this command needs to run in a server where i have **Manage Channels**.')], ephemeral: true });
-    }
-
-    await interaction.deferReply({ ephemeral: true });
-
-    const support = loadTicketSupport();
-
-    // locked channel only opener, bot, support roles, rom roles, and admin-perm roles can see/talk.
-    const overwrites = buildTicketOverwrites(guild, interaction.user.id);
-    let parentId = interaction.channel?.parentId || undefined;
-    if (parentId) {
-      const parent = guild.channels.cache.get(parentId);
-      if (!parent || !parent.permissionsFor(me)?.has(PermissionsBitField.Flags.ManageChannels)) parentId = undefined;
-    }
-
-    let ch;
-    try {
-      ch = await guild.channels.create({
-        name: `tag ${robloxUsername || interaction.user.username}`.toLowerCase().replace(/[^a-z0-9-]/g, ' ').slice(0, 90) || `tag ${interaction.user.id}`,
-        type: ChannelType.GuildText,
-        parent: parentId,
-        permissionOverwrites: overwrites,
-        reason: `self tag ticket opened by ${interaction.user.tag}`
-      });
-    } catch (err) {
-      console.error('tag ticket create failed:', err);
-      return interaction.editReply({ embeds: [errorEmbed('failed').setDescription(`could not create channel ${err?.rawError?.message || err.message}`)] });
-    }
-
-    tickets[ch.id] = { userId: interaction.user.id, openedAt: Date.now(), robloxUsername, kind: 'tag' };
-    saveTickets(tickets);
-
-    const robloxLink = `https://www.roblox.com/users/?username=${encodeURIComponent(robloxUsername)}`;
-    const panelEmbed = baseEmbed().setColor(0x2C2F33)
-      .setTitle('Tag Ticket')
-      .setDescription(`tag ticket opened by <@${interaction.user.id}> \n\nclick **Tag** to pick the tag you want a **whitelisted user** will then have to reply \`approve\` or \`deny\` here before it's applied to your roblox account.`)
-      .addFields({ name: 'roblox username', value: `[\`${robloxUsername}\`](${robloxLink})`, inline: true })
-      .setTimestamp();
-    const panelRow = new ActionRowBuilder().addComponents(
-      new ButtonBuilder().setCustomId(`tag pick:${interaction.user.id}:${encodeURIComponent(robloxUsername)}`).setLabel('Tag').setStyle(ButtonStyle.Success),
-      new ButtonBuilder().setCustomId(`tag close:${interaction.user.id}`).setLabel('Close').setStyle(ButtonStyle.Secondary)
-    );
-
-    await ch.send({
-      content: `${interaction.user}`,
-      embeds: [panelEmbed],
-      components: [panelRow],
-      allowedMentions: { users: [interaction.user.id] }
-    });
-    sendBotLog(guild, baseEmbed().setColor(0x2C2F33).setTitle('tag ticket opened').setDescription(`${interaction.user.tag} opened ${ch} (roblox: \`${robloxUsername}\`)`));
-      sendTagLog(guild, { embeds: [baseEmbed().setColor(0x2C2F33).setTitle('tag ticket opened').setDescription(`${interaction.user.tag} opened ${ch} (roblox: \`${robloxUsername}\`)`)] });
-    return interaction.editReply(`your tag ticket: ${ch}`);
-  }
-
-  // tag ticket modal submit: create a real ticket channel
   if (interaction.isModalSubmit() && interaction.customId === 'raidpoint submit') {
     if (!interaction.guild) return interaction.reply({ content: 'this only works in a server', ephemeral: true });
     const robloxUsername = interaction.fields.getTextInputValue('roblox_username').trim();
@@ -3900,72 +3871,6 @@ async function dispatchSlashInner(interaction) {
       allowedMentions: { users: [interaction.user.id] }
     });
     return interaction.reply({ content: 'submitted! you\'ll get pinged when staff reviews it', ephemeral: true });
-  }
-
-  if (interaction.isModalSubmit() && interaction.customId === 'tagticket open modal') {
-    const robloxUsername = interaction.fields.getTextInputValue('tagticket roblox username').trim();
-    const tickets = loadTickets();
-    const existing = findOpenTicket(tickets, interaction.guild, t => t.userId === interaction.user.id && t.kind === "tagticket");
-    if (existing) return interaction.reply({ embeds: [errorEmbed('ticket already open').setDescription(`you already have an open tag ticket: <#${existing[0]}> `)], ephemeral: true });
-
-    const guild = interaction.guild;
-    const me = guild ? (guild.members.me ?? await guild.members.fetchMe().catch(() => null)) : null;
-    const canCreate = !!(guild && me && me.permissions.has(PermissionsBitField.Flags.ManageChannels));
-
-    const robloxLink = `https://www.roblox.com/users/?username=${encodeURIComponent(robloxUsername)}`;
-    const panelEmbed = baseEmbed().setColor(0x2C2F33)
-      .setTitle('Tag Ticket')
-      .setDescription(`tag ticket opened by <@${interaction.user.id}> \n\nstaff: click **Tag** to pick a tag the opener will then have to **approve** or **deny** it in this ticket before it's applied.`)
-      .addFields({ name: 'roblox username', value: `[\`${robloxUsername}\`](${robloxLink})`, inline: true })
-      .setTimestamp();
-    const panelRow = new ActionRowBuilder().addComponents(
-      new ButtonBuilder().setCustomId(`tagticket tag:${interaction.user.id}:${encodeURIComponent(robloxUsername)}`).setLabel('Tag').setStyle(ButtonStyle.Success),
-      new ButtonBuilder().setCustomId(`tagticket close:${interaction.user.id}`).setLabel('Close').setStyle(ButtonStyle.Secondary)
-    );
-
-    if (!canCreate) {
-      // fallback for dms / foreign servers post the panel inline (no real channel possible).
-      return interaction.reply({ embeds: [panelEmbed], components: [panelRow] });
-    }
-
-    await interaction.deferReply({ ephemeral: true });
-
-    const support = loadTicketSupport();
-
-    const overwrites = buildTicketOverwrites(guild, interaction.user.id);
-    let parentId = interaction.channel?.parentId || undefined;
-    if (parentId) {
-      const parent = guild.channels.cache.get(parentId);
-      if (!parent || !parent.permissionsFor(me)?.has(PermissionsBitField.Flags.ManageChannels)) parentId = undefined;
-    }
-
-    let ch;
-    try {
-      ch = await guild.channels.create({
-        name: `tag ${robloxUsername || interaction.user.username}`.toLowerCase().replace(/[^a-z0-9-]/g, ' ').slice(0, 90) || `tag ${interaction.user.id}`,
-        type: ChannelType.GuildText,
-        parent: parentId,
-        permissionOverwrites: overwrites,
-        reason: `tag ticket opened by ${interaction.user.tag}`
-      });
-    } catch (err) {
-      console.error('tagticket create failed:', err);
-      return interaction.editReply({ embeds: [errorEmbed('failed').setDescription(`could not create ticket channel ${err?.rawError?.message || err.message}`)] });
-    }
-
-    tickets[ch.id] = { userId: interaction.user.id, openedAt: Date.now(), robloxUsername, kind: 'tagticket' };
-    saveTickets(tickets);
-
-    const supportPing = support.length ? support.map(id => `<@&${id}> `).join(' ') : '';
-    await ch.send({
-      content: `${interaction.user} ${supportPing}`.trim(),
-      embeds: [panelEmbed],
-      components: [panelRow],
-      allowedMentions: { users: [interaction.user.id], roles: support }
-    });
-    sendBotLog(guild, baseEmbed().setColor(0x2C2F33).setTitle('tag ticket opened').setDescription(`${interaction.user.tag} opened ${ch} (roblox: \`${robloxUsername}\`)`));
-    sendTagLog(guild, { embeds: [baseEmbed().setColor(0x2C2F33).setTitle('tag ticket opened').setDescription(`${interaction.user.tag} opened ${ch} (roblox: \`${robloxUsername}\`)`)] });
-    return interaction.editReply({ embeds: [successEmbed('tag ticket created').setDescription(`your tag ticket: ${ch}`)] });
   }
 
   // select menus
@@ -4062,196 +3967,9 @@ async function dispatchSlashInner(interaction) {
           ));
         return interaction.showModal(modal);
       }
-      if (kind === 'tag') {
-        const tickets = loadTickets();
-        const existing = findOpenTicket(tickets, interaction.guild, t => t.userId === interaction.user.id && t.kind === "tag");
-        if (existing) return interaction.reply({ embeds: [errorEmbed('ticket already open').setDescription(`you already have an open tag ticket: <#${existing[0]}> `)], ephemeral: true });
-        const modal = new ModalBuilder().setCustomId('tag open modal').setTitle('Open a Tag Ticket')
-          .addComponents(new ActionRowBuilder().addComponents(
-            new TextInputBuilder()
-              .setCustomId('tag roblox username')
-              .setLabel('Roblox Username')
-              .setPlaceholder('Enter your Roblox username...')
-              .setStyle(TextInputStyle.Short).setRequired(true).setMaxLength(20)
-          ));
-        return interaction.showModal(modal);
-      }
       return interaction.reply({ content: 'unknown choice', ephemeral: true });
     }
 
-    // /setuptag self tag select → opener picked their own tag, await whitelist approval
-    if (interaction.customId.startsWith('tag select:')) {
-      const parts = interaction.customId.split(':');
-      const ownerId = parts[1];
-      const robloxFromBtn = parts[2] ? decodeURIComponent(parts[2]) : '';
-      if (interaction.user.id !== ownerId)
-        return interaction.reply({ embeds: [errorEmbed('not your ticket').setDescription('only the ticket opener picks here.')], ephemeral: true });
-
-      const roleId = interaction.values[0];
-      const roles = loadRobloxRoles();
-      const lookup = Object.values(roles).find(r => String(r.id) === String(roleId));
-      if (!lookup)
-        return interaction.reply({ embeds: [errorEmbed('unknown tag').setDescription('that tag is no longer registered.')], ephemeral: true });
-
-      const robloxName = robloxFromBtn || (loadVerify()?.verified?.[ownerId]?.robloxName);
-      if (!robloxName)
-        return interaction.reply({ embeds: [errorEmbed('no roblox username').setDescription('couldn\'t find your roblox username reopen the ticket.')], ephemeral: true });
-
-      await interaction.update({
-        content: `tag pending approval a whitelisted user must reply \`approve\` or \`deny\` in this ticket.`,
-        components: []
-      });
-
-      const envMgrs2 = (process.env.WHITELIST_MANAGERS || '').split(',').map(s => s.trim()).filter(Boolean);
-      const approverPool = new Set([...loadWhitelist(), ...loadWlManagers(), ...loadTempOwners(), ...envMgrs2]);
-      approverPool.delete(ownerId);
-      const isApprover = (uid) => approverPool.has(uid);
-
-      const channel = interaction.channel;
-      const promptEmbed = baseEmbed().setColor(0x2C2F33).setTitle('tag pending approval')
-        .setDescription(`<@${ownerId}> wants the **${lookup.name}** tag on roblox account **${robloxName}**.\n\na **whitelisted user** (not the opener) must reply \`approve\` or \`deny\` within 5 minutes.`)
-        .addFields(
-          { name: 'tag', value: `${lookup.name} \`${lookup.id}\``, inline: true },
-          { name: 'roblox', value: `\`${robloxName}\``, inline: true },
-          { name: 'requested by', value: `<@${ownerId}> `, inline: true }
-        ).setTimestamp();
-      await channel.send({ embeds: [promptEmbed] });
-
-      try {
-        const collected = await channel.awaitMessages({
-          filter: m => isApprover(m.author.id) && /^(approve|deny)$/i.test(m.content.trim()),
-          max: 1, time: 5 * 60_000, errors: ['time']
-        });
-        const decisionMsg = collected.first();
-        const decision = decisionMsg.content.trim().toLowerCase();
-        const approverId = decisionMsg.author.id;
-        if (decision === 'deny') {
-          await channel.send({ embeds: [baseEmbed().setColor(0x2C2F33).setTitle('tag denied').setDescription(`<@${approverId}> denied the **${lookup.name}** tag for <@${ownerId}> .`)] });
-          return;
-        }
-        const pending = await channel.send({ embeds: [baseEmbed().setColor(0x2C2F33).setTitle('applying tag').setDescription(`approved ranking **${robloxName}** as **${lookup.name}**…`)] });
-        try {
-          const result = await rankRobloxUser(robloxName, lookup.id);
-          appendTagLog({
-            action: 'tag', tag: lookup.name, roblox: result.displayName,
-            robloxId: result.userId, giverId: approverId, giverTag: decisionMsg.author.tag,
-            targetDiscordId: ownerId, guildId: interaction.guildId
-          });
-          const e = baseEmbed().setColor(0x2C2F33).setTitle('tag given')
-            .setDescription(`tagged **${result.displayName}** as **${lookup.name}** (approved by <@${approverId}> )`)
-            .addFields(
-              { name: 'discord', value: `<@${ownerId}> `, inline: true },
-              { name: 'roblox', value: `[${result.displayName}](https://www.roblox.com/users/${result.userId}/profile)`, inline: true },
-              { name: 'tag', value: `${lookup.name} \`${lookup.id}\``, inline: true }
-            ).setTimestamp();
-          if (result.avatarUrl) e.setThumbnail(result.avatarUrl);
-          await pending.edit({ embeds: [e] }).catch(() => channel.send({ embeds: [e] }));
-          if (interaction.guild) sendBotLog(interaction.guild, e);
-            if (interaction.guild) sendTagLog(interaction.guild, { embeds: [e] });
-        } catch (err) {
-          await pending.edit({ embeds: [errorEmbed('failed').setDescription(err.message)] }).catch(() => channel.send({ embeds: [errorEmbed('failed').setDescription(err.message)] }));
-        }
-      } catch {
-        await channel.send({ embeds: [baseEmbed().setColor(0x2C2F33).setTitle('approval timed out').setDescription('no whitelisted user replied in 5 minutes tag was not applied.')] }).catch(() => {});
-      }
-      return;
-    }
-
-    if (interaction.customId.startsWith('tagticket select:')) {
-      const parts = interaction.customId.split(':');
-      const ownerId = parts[1];
-      const robloxFromBtn = parts[2] ? decodeURIComponent(parts[2]) : '';
-
-      if (interaction.user.id === ownerId)
-        return interaction.reply({ embeds: [errorEmbed('not allowed').setDescription('you cannot tag yourself.')], ephemeral: true });
-
-      const allowedDm = !interaction.guild && isWlManager(interaction.user.id);
-      const allowedGuild = !!interaction.guild && canUseRole(interaction.member);
-      if (!allowedDm && !allowedGuild)
-        return interaction.reply({ embeds: [errorEmbed('no permission').setDescription('you no longer have permission to apply tags.')], ephemeral: true });
-
-      const roleId = interaction.values[0];
-      const roles = loadRobloxRoles();
-      const lookup = Object.values(roles).find(r => String(r.id) === String(roleId));
-      if (!lookup)
-        return interaction.reply({ embeds: [errorEmbed('unknown tag').setDescription('that tag is no longer registered.')], ephemeral: true });
-
-      // resolve the target's roblox username: prefer the one supplied when the
-      // ticket was opened; fall back to a registered link if any.
-      let robloxName = robloxFromBtn;
-      if (!robloxName) {
-        const linked = loadVerify()?.verified?.[ownerId];
-        if (linked?.robloxName) robloxName = linked.robloxName;
-      }
-      if (!robloxName)
-        return interaction.reply({ embeds: [errorEmbed('no roblox username').setDescription(`<@${ownerId}> didn't supply a Roblox username when opening the ticket.`)], ephemeral: true });
-
-      // acknowledge the select interaction quickly and then post the approval prompt.
-      await interaction.update({
-        content: `tag pending approval a different whitelisted user must reply \`approve\` or \`deny\` in this ticket.`,
-        components: []
-      });
-
-      // whitelisted approvers = bot whitelist + wl managers + temp owners + env mgrs,
-      // EXCLUDING the staff member who picked the tag (so they can't self approve)
-      // and the ticket opener.
-      const envMgrs2 = (process.env.WHITELIST_MANAGERS || '').split(',').map(s => s.trim()).filter(Boolean);
-      const approverPool = new Set([...loadWhitelist(), ...loadWlManagers(), ...loadTempOwners(), ...envMgrs2]);
-      approverPool.delete(interaction.user.id);
-      approverPool.delete(ownerId);
-      const isApprover = (uid) => approverPool.has(uid);
-
-      const channel = interaction.channel;
-      const promptEmbed = baseEmbed().setColor(0x2C2F33).setTitle('tag pending approval')
-        .setDescription(`**${interaction.user.tag}** wants to tag <@${ownerId}> as **${lookup.name}** on roblox account **${robloxName}**.\n\na **whitelisted user** (other than the requester or the opener) must reply \`approve\` or \`deny\` within 5 minutes.`)
-        .addFields(
-          { name: 'tag', value: `${lookup.name} \`${lookup.id}\``, inline: true },
-          { name: 'roblox', value: `\`${robloxName}\``, inline: true },
-          { name: 'requested by', value: `<@${interaction.user.id}> `, inline: true }
-        ).setTimestamp();
-      const promptMsg = await channel.send({ embeds: [promptEmbed] });
-
-      try {
-        const collected = await channel.awaitMessages({
-          filter: m => isApprover(m.author.id) && /^(approve|deny)$/i.test(m.content.trim()),
-          max: 1, time: 5 * 60_000, errors: ['time']
-        });
-        const decisionMsg = collected.first();
-        const decision = decisionMsg.content.trim().toLowerCase();
-        const approverId = decisionMsg.author.id;
-        if (decision === 'deny') {
-          await channel.send({ embeds: [baseEmbed().setColor(0x2C2F33).setTitle('tag denied').setDescription(`<@${approverId}> denied the **${lookup.name}** tag for <@${ownerId}> .`)] });
-          return;
-        }
-        // approved apply the tag.
-        const pending = await channel.send({ embeds: [baseEmbed().setColor(0x2C2F33).setTitle('applying tag').setDescription(`approved ranking **${robloxName}** as **${lookup.name}**…`)] });
-        try {
-          const result = await rankRobloxUser(robloxName, lookup.id);
-          appendTagLog({
-            action: 'tagticket', tag: lookup.name, roblox: result.displayName,
-            robloxId: result.userId, giverId: interaction.user.id, giverTag: interaction.user.tag,
-            targetDiscordId: ownerId, guildId: interaction.guildId
-          });
-          const e = baseEmbed().setColor(0x2C2F33).setTitle('tag given')
-            .setDescription(`tagged **${result.displayName}** as **${lookup.name}** (approved by <@${approverId}> )`)
-            .addFields(
-              { name: 'discord', value: `<@${ownerId}> `, inline: true },
-              { name: 'roblox', value: `[${result.displayName}](https://www.roblox.com/users/${result.userId}/profile)`, inline: true },
-              { name: 'tag', value: `${lookup.name} \`${lookup.id}\``, inline: true },
-              { name: 'given by', value: `${interaction.user.tag} (<@${interaction.user.id}> )`, inline: false }
-            ).setTimestamp();
-          if (result.avatarUrl) e.setThumbnail(result.avatarUrl);
-          await pending.edit({ embeds: [e] }).catch(() => channel.send({ embeds: [e] }));
-          if (interaction.guild) sendBotLog(interaction.guild, e);
-          if (interaction.guild) sendTagLog(interaction.guild, { embeds: [e] });
-        } catch (err) {
-          await pending.edit({ embeds: [errorEmbed('failed').setDescription(err.message)] }).catch(() => channel.send({ embeds: [errorEmbed('failed').setDescription(err.message)] }));
-        }
-      } catch {
-        await channel.send({ embeds: [baseEmbed().setColor(0x2C2F33).setTitle('approval timed out').setDescription(`no reply from <@${ownerId}> in 60s tag was not applied.`)] }).catch(() => {});
-      }
-      return;
-    }
   }
 
   // buttons
@@ -4332,167 +4050,6 @@ async function dispatchSlashInner(interaction) {
       const e = await buildRaidLbEmbed(interaction.guild?.id, mode, page, interaction.client);
       const comps = buildRaidLbComponents(mode, e.safePage, e.totalPages, ownerId);
       return interaction.update({ embeds: [e.embed], components: comps });
-    }
-
-    // tagticket: tag button → ephemeral select menu of all registered tags
-    if (interaction.customId.startsWith('tagticket tag:')) {
-      const parts = interaction.customId.split(':');
-      const ownerId = parts[1];
-      const robloxFromBtn = parts[2] ? decodeURIComponent(parts[2]) : '';
-      // anyone except the opener can pick a tag the opener must approve it later
-      if (interaction.user.id === ownerId)
-        return interaction.reply({ embeds: [errorEmbed('not allowed').setDescription('you cannot tag yourself wait for someone else to pick a tag for you.')], ephemeral: true });
-
-      // permission: in dms only WL managers; in guilds anyone with role perms
-      const allowedDm = !interaction.guild && isWlManager(interaction.user.id);
-      const allowedGuild = !!interaction.guild && canUseRole(interaction.member);
-      if (!allowedDm && !allowedGuild)
-        return interaction.reply({ embeds: [errorEmbed('no permission').setDescription('only staff (whitelist managers or members allowed via `/setroleperms`) can apply tags.')], ephemeral: true });
-
-      const roles = loadRobloxRoles();
-      const entries = Object.values(roles).filter(r => r && r.id);
-      if (!entries.length)
-        return interaction.reply({ embeds: [errorEmbed('no tags').setDescription('no roblox group roles are registered. a wl manager must add some with `/setrole name:<name id:<id `.')], ephemeral: true });
-
-      // discord limits select menus to 25 options
-      const options = entries.slice(0, 25).map(r => ({
-        label: String(r.name).slice(0, 100),
-        value: String(r.id),
-        description: `roblox role id ${r.id}`.slice(0, 100)
-      }));
-
-      const menu = new StringSelectMenuBuilder()
-        .setCustomId(`tagticket select:${ownerId}:${encodeURIComponent(robloxFromBtn)}`)
-        .setPlaceholder('pick a tag to give')
-        .addOptions(options);
-
-      return interaction.reply({
-        content: `pick the tag to give to <@${ownerId}> :`,
-        components: [new ActionRowBuilder().addComponents(menu)],
-        ephemeral: true
-      });
-    }
-
-    if (interaction.customId.startsWith('tagticket close:')) {
-      const ownerId = interaction.customId.split(':')[1];
-      const allowedDm = !interaction.guild && (isWlManager(interaction.user.id) || interaction.user.id === ownerId);
-      const allowedGuild = !!interaction.guild && (canUseRole(interaction.member) || interaction.user.id === ownerId);
-      if (!allowedDm && !allowedGuild)
-        return interaction.reply({ content: 'only the ticket owner or staff can close this', ephemeral: true });
-
-      // if this is a real ticket channel, delete it like /closeticket does.
-      const tickets = loadTickets();
-      const t = interaction.channel ? tickets[interaction.channel.id] : null;
-      if (t && t.kind === 'tagticket' && interaction.guild) {
-        await interaction.reply({ embeds: [baseEmbed().setColor(0x2C2F33).setTitle('closing tag ticket').setDescription(`closed by <@${interaction.user.id}> channel will be deleted in 3s`)] });
-        delete tickets[interaction.channel.id]; saveTickets(tickets);
-        sendBotLog(interaction.guild, baseEmbed().setColor(0x2C2F33).setTitle('tag ticket closed').setDescription(`<#${interaction.channel.id}> (${interaction.channel.name}) closed by ${interaction.user.tag}`));
-          sendTagLog(interaction.guild, { embeds: [baseEmbed().setColor(0x2C2F33).setTitle('tag ticket closed').setDescription(`<#${interaction.channel.id}> (${interaction.channel.name}) closed by ${interaction.user.tag}`)] });
-        setTimeout(() => { interaction.channel.delete(`tag ticket closed by ${interaction.user.tag}`).catch(() => {}); }, 3000);
-        return;
-      }
-
-      // inline / DM panel: just edit the message.
-      try {
-        await interaction.update({ embeds: [baseEmbed().setColor(0x2C2F33).setTitle('Tag Ticket Closed').setDescription(`closed by <@${interaction.user.id}> `)], components: [] });
-      } catch {
-        return interaction.reply({ content: 'closed', ephemeral: true });
-      }
-      return;
-    }
-
-    // /setuptag panel: open a self tag ticket (shows roblox username modal)
-    if (interaction.customId === 'tag open') {
-      const tickets = loadTickets();
-      const existing = findOpenTicket(tickets, interaction.guild, t => t.userId === interaction.user.id && t.kind === "tag");
-      if (existing) return interaction.reply({ embeds: [errorEmbed('ticket already open').setDescription(`you already have an open tag ticket: <#${existing[0]}> `)], ephemeral: true });
-      const modal = new ModalBuilder().setCustomId('tag open modal').setTitle('Open a Tag Ticket')
-        .addComponents(new ActionRowBuilder().addComponents(
-          new TextInputBuilder()
-            .setCustomId('tag roblox username')
-            .setLabel('Roblox Username')
-            .setPlaceholder('Enter your Roblox username...')
-            .setStyle(TextInputStyle.Short)
-            .setRequired(true)
-            .setMaxLength(20)
-        ));
-      return interaction.showModal(modal);
-    }
-
-    // /setuptag: tag button → ephemeral select menu (opener picks own tag)
-    if (interaction.customId.startsWith('tag pick:')) {
-      const parts = interaction.customId.split(':');
-      const ownerId = parts[1];
-      const robloxFromBtn = parts[2] ? decodeURIComponent(parts[2]) : '';
-      // only the opener may pick (this is a self tag flow).
-      if (interaction.user.id !== ownerId)
-        return interaction.reply({ embeds: [errorEmbed('not your ticket').setDescription('only the ticket opener can pick a tag here.')], ephemeral: true });
-
-      const roles = loadRobloxRoles();
-      const entries = Object.values(roles).filter(r => r && r.id);
-      if (!entries.length)
-        return interaction.reply({ embeds: [errorEmbed('no tags').setDescription('no roblox group roles are registered. a wl manager must add some with `/setrole name:<name id:<id `.')], ephemeral: true });
-
-      const options = entries.slice(0, 25).map(r => ({
-        label: String(r.name).slice(0, 100),
-        value: String(r.id),
-        description: `roblox role id ${r.id}`.slice(0, 100)
-      }));
-
-      const menu = new StringSelectMenuBuilder()
-        .setCustomId(`tag select:${ownerId}:${encodeURIComponent(robloxFromBtn)}`)
-        .setPlaceholder('pick the tag you want')
-        .addOptions(options);
-
-      return interaction.reply({
-        content: 'pick the tag you want a whitelisted user will then have to approve it:',
-        components: [new ActionRowBuilder().addComponents(menu)],
-        ephemeral: true
-      });
-    }
-
-    // /setuptag: close button closes the self tag ticket channel
-    if (interaction.customId.startsWith('tag close:')) {
-      const ownerId = interaction.customId.split(':')[1];
-      const allowedDm = !interaction.guild && (isWlManager(interaction.user.id) || interaction.user.id === ownerId);
-      const allowedGuild = !!interaction.guild && (canUseRole(interaction.member) || interaction.user.id === ownerId);
-      if (!allowedDm && !allowedGuild)
-        return interaction.reply({ content: 'only the ticket owner or staff can close this', ephemeral: true });
-
-      const tickets = loadTickets();
-      const t = interaction.channel ? tickets[interaction.channel.id] : null;
-      if (t && t.kind === 'tag' && interaction.guild) {
-        await interaction.reply({ embeds: [baseEmbed().setColor(0x2C2F33).setTitle('closing tag ticket').setDescription(`closed by <@${interaction.user.id}> channel will be deleted in 3s`)] });
-        delete tickets[interaction.channel.id]; saveTickets(tickets);
-        sendBotLog(interaction.guild, baseEmbed().setColor(0x2C2F33).setTitle('tag ticket closed').setDescription(`<#${interaction.channel.id}> (${interaction.channel.name}) closed by ${interaction.user.tag}`));
-        sendTagLog(interaction.guild, { embeds: [baseEmbed().setColor(0x2C2F33).setTitle('tag ticket closed').setDescription(`<#${interaction.channel.id}> (${interaction.channel.name}) closed by ${interaction.user.tag}`)] });
-        setTimeout(() => { interaction.channel.delete(`tag ticket closed by ${interaction.user.tag}`).catch(() => {}); }, 3000);
-        return;
-      }
-      try {
-        await interaction.update({ embeds: [baseEmbed().setColor(0x2C2F33).setTitle('Tag Ticket Closed').setDescription(`closed by <@${interaction.user.id}> `)], components: [] });
-      } catch {
-        return interaction.reply({ content: 'closed', ephemeral: true });
-      }
-      return;
-    }
-
-    // tag ticket panel: open a tag ticket (shows roblox username modal)
-    if (interaction.customId === 'tagticket open') {
-      const tickets = loadTickets();
-      const existing = findOpenTicket(tickets, interaction.guild, t => t.userId === interaction.user.id && t.kind === "tagticket");
-      if (existing) return interaction.reply({ embeds: [errorEmbed('ticket already open').setDescription(`you already have an open tag ticket: <#${existing[0]}> `)], ephemeral: true });
-      const modal = new ModalBuilder().setCustomId('tagticket open modal').setTitle('Open a Tag Ticket')
-        .addComponents(new ActionRowBuilder().addComponents(
-          new TextInputBuilder()
-            .setCustomId('tagticket roblox username')
-            .setLabel('Roblox Username')
-            .setPlaceholder('Enter your Roblox username...')
-            .setStyle(TextInputStyle.Short)
-            .setRequired(true)
-            .setMaxLength(20)
-        ));
-      return interaction.showModal(modal);
     }
 
     // ticket panel: open a ticket (shows roblox username modal)
@@ -5755,8 +5312,7 @@ async function dispatchSlashInner(interaction) {
     return interaction.reply(`verify role set — verified users will receive ${role}`);
   }
 
-  // /setuptickets — supports a "type" choice so the panel can be verification-only,
-  // tag-only, or both. defaults to "both" (the original behaviour) when no type is given.
+  // /setuptickets — sends the ticket panel to a channel, can be verification only, tag only, or both
   if (commandName === 'setuptickets') {
     if (!guild) return interaction.reply({ content: 'server only', ephemeral: true });
     if (!canUseAny(interaction.user.id))
@@ -5764,87 +5320,57 @@ async function dispatchSlashInner(interaction) {
     const ch = interaction.options.getChannel('channel');
     const rawType = (interaction.options.getString('type') || 'both').toLowerCase();
     const kind = ['verification', 'tag', 'both'].includes(rawType) ? rawType : 'both';
-    const defaultTitle =
-      kind === 'verification' ? 'Open a Verification Ticket' :
-      kind === 'tag'          ? 'Open a Tag Ticket' :
-                                'Open a Ticket';
-    const title = interaction.options.getString('title') || defaultTitle;
-    const defaultDesc =
-      kind === 'verification' ? 'click the button below to open a verification ticket. a private channel will be created for you and the support team.' :
-      kind === 'tag'          ? 'click the button below to open a tag ticket. a private channel will be created for you and the support team.' :
-                                'click an option below to open a ticket. a private channel will be created for you and the support team.';
-    const description = interaction.options.getString('description') || defaultDesc;
     if (ch.type !== ChannelType.GuildText) return interaction.reply({ embeds: [errorEmbed('bad channel').setDescription('pick a text channel')], ephemeral: true });
 
-    let panel, row;
-    if (kind === 'verification') {
-      panel = baseEmbed().setColor(0x2C2F33).setTitle(title).setDescription(`${description}\n\n**Verification** — open a verification ticket and a staff member will help you verify your roblox account.`);
-      row = new ActionRowBuilder().addComponents(
-        new ButtonBuilder().setCustomId('ticket open').setLabel('Open Verification Ticket').setStyle(ButtonStyle.Secondary)
-      );
-    } else if (kind === 'tag') {
-      panel = baseEmbed().setColor(0x2C2F33).setTitle(title).setDescription(`${description}\n\n**Tag** — request a roblox tag. a whitelisted user will approve it inside the ticket.`);
-      row = new ActionRowBuilder().addComponents(
-        new ButtonBuilder().setCustomId('tagticket open').setLabel('Open Tag Ticket').setStyle(ButtonStyle.Secondary)
-      );
-    } else {
-      panel = baseEmbed().setColor(0x2C2F33).setTitle(title).setDescription(`${description}\n\n**Verification** — open a verification ticket.\n**Tag** — request a roblox tag (a whitelisted user must approve).`);
-      const menu = new StringSelectMenuBuilder()
-        .setCustomId('ticket kind select')
-        .setPlaceholder('choose what you need…')
-        .addOptions(
-          { label: 'Verification', value: 'verification', description: 'open a verification ticket' },
-          { label: 'Tag',          value: 'tag',          description: 'pick a roblox tag — needs whitelist approval' }
-        );
-      row = new ActionRowBuilder().addComponents(menu);
+    // default kanji + text for each panel type
+    const defaultKanji = { verification: '承', tag: '印', both: '門' };
+    const defaults = {
+      verification: { desc: 'before u open a ticket make sure to join the roblox group\n\ntickets without ur actual roblox username will be closed' },
+      tag:          { desc: 'open a ticket to request a roblox tag\n\na whitelisted user will approve it inside the ticket before it gets applied' },
+      both:         { desc: 'before u open a ticket make sure to join the roblox group\n\ntickets without ur actual roblox username will be closed' },
+    };
+
+    // pull all the customization options (all optional — defaults look like the screenshot)
+    const kanji       = interaction.options.getString('kanji')       || defaultKanji[kind];
+    const customTitle = interaction.options.getString('title');
+    const title       = customTitle || `${kanji}  ${kind === 'both' ? 'tickets' : kind}`;
+    const description = interaction.options.getString('description') || defaults[kind].desc;
+    const footer      = interaction.options.getString('footer')      || null;
+    const placeholder = interaction.options.getString('placeholder') || 'open a ticket...';
+
+    // parse custom color — strip # if they included it, fall back to dark red
+    const rawColor  = interaction.options.getString('color');
+    let panelColor  = 0x4A0E0E;
+    if (rawColor) {
+      const parsed = parseInt(rawColor.replace('#', ''), 16);
+      if (!isNaN(parsed)) panelColor = parsed;
     }
+
+    // build the embed — always keep the sidebar style, just swap the text
+    const panel = baseEmbed()
+      .setColor(panelColor)
+      .setTitle(title)
+      .setDescription(description);
+
+    if (footer) panel.setFooter({ text: footer });
+
+    const menuOptions = [];
+    if (kind === 'verification' || kind === 'both') {
+      menuOptions.push({ label: 'verification ticket', value: 'verification', description: 'get verified with your roblox account' });
+    }
+    if (kind === 'tag' || kind === 'both') {
+      menuOptions.push({ label: 'tag ticket', value: 'tag', description: 'request a roblox tag (needs approval)' });
+    }
+    const menu = new StringSelectMenuBuilder()
+      .setCustomId('ticket kind select')
+      .setPlaceholder(placeholder)
+      .addOptions(menuOptions);
+    const row = new ActionRowBuilder().addComponents(menu);
     try {
       await ch.send({ embeds: [panel], components: [row] });
       return interaction.reply({ content: `ticket panel sent to ${ch} (type: \`${kind}\`)`, ephemeral: true });
     } catch {
-      return interaction.reply({ embeds: [errorEmbed('failed').setDescription('couldn\'t send to that channel check my permissions')], ephemeral: true });
-    }
-  }
-
-  // /setuptagticket
-  if (commandName === 'setuptagticket') {
-    if (!guild) return interaction.reply({ content: 'server only', ephemeral: true });
-    if (!canUseAny(interaction.user.id))
-      return interaction.reply({ embeds: [errorEmbed('no permission').setDescription('only whitelist managers can use `/setuptagticket`')], ephemeral: true });
-    const ch = interaction.options.getChannel('channel');
-    const title = interaction.options.getString('title') || 'Open a Tag Ticket';
-    const description = interaction.options.getString('description') || 'click the button below to open a tag ticket. a private channel will be created for you and the support team.';
-    if (ch.type !== ChannelType.GuildText) return interaction.reply({ embeds: [errorEmbed('bad channel').setDescription('pick a text channel')], ephemeral: true });
-    const panel = baseEmbed().setColor(0x2C2F33).setTitle(title).setDescription(description);
-    const row = new ActionRowBuilder().addComponents(
-      new ButtonBuilder().setCustomId('tagticket open').setLabel('Open Tag Ticket').setStyle(ButtonStyle.Secondary)
-    );
-    try {
-      await ch.send({ embeds: [panel], components: [row] });
-      return interaction.reply({ content: `tag ticket panel sent to ${ch}`, ephemeral: true });
-    } catch {
-      return interaction.reply({ embeds: [errorEmbed('failed').setDescription('couldn\'t send to that channel check my permissions')], ephemeral: true });
-    }
-  }
-
-  // /setuptag
-  if (commandName === 'setuptag') {
-    if (!guild) return interaction.reply({ content: 'server only', ephemeral: true });
-    if (!canUseAny(interaction.user.id))
-      return interaction.reply({ embeds: [errorEmbed('no permission').setDescription('only whitelist managers can use `/setuptag`')], ephemeral: true });
-    const ch = interaction.options.getChannel('channel');
-    const title = interaction.options.getString('title') || 'Open a Tag Ticket';
-    const description = interaction.options.getString('description') || 'click the button below to open a tag ticket. a private channel will be created for you and the support team.';
-    if (ch.type !== ChannelType.GuildText) return interaction.reply({ embeds: [errorEmbed('bad channel').setDescription('pick a text channel')], ephemeral: true });
-    const panel = baseEmbed().setColor(0x2C2F33).setTitle(title).setDescription(description);
-    const row = new ActionRowBuilder().addComponents(
-      new ButtonBuilder().setCustomId('tag open').setLabel('Open Tag Ticket').setStyle(ButtonStyle.Secondary)
-    );
-    try {
-      await ch.send({ embeds: [panel], components: [row] });
-      return interaction.reply({ content: `tag panel sent to ${ch}`, ephemeral: true });
-    } catch {
-      return interaction.reply({ embeds: [errorEmbed('failed').setDescription('couldn\'t send to that channel check my permissions')], ephemeral: true });
+      return interaction.reply({ embeds: [errorEmbed('failed').setDescription("couldn't send to that channel — check my permissions")], ephemeral: true });
     }
   }
 
@@ -5961,23 +5487,72 @@ async function dispatchSlashInner(interaction) {
     return;
   }
 
-  // /tagticket anyone can open one; shows roblox username modal
-  if (commandName === 'tagticket') {
-    const tickets = loadTickets();
-    const existing = findOpenTicket(tickets, interaction.guild, t => t.userId === interaction.user.id && t.kind === "tagticket");
-    if (existing) return interaction.reply({ embeds: [errorEmbed('ticket already open').setDescription(`you already have an open tag ticket: <#${existing[0]}> `)], ephemeral: true });
+  // /alts — check if a roblox account is linked to more than one discord user
+  if (commandName === 'alts') {
+    if (!guild) return interaction.reply({ content: 'server only', ephemeral: true });
+    if (!canUseAny(interaction.user.id))
+      return interaction.reply({ embeds: [errorEmbed('no permission').setDescription('only whitelist managers can use `/alts`')], ephemeral: true });
 
-    const modal = new ModalBuilder().setCustomId('tagticket open modal').setTitle('Open a Tag Ticket')
-      .addComponents(new ActionRowBuilder().addComponents(
-        new TextInputBuilder()
-          .setCustomId('tagticket roblox username')
-          .setLabel('Roblox Username')
-          .setPlaceholder('Enter your Roblox username...')
-          .setStyle(TextInputStyle.Short)
-          .setRequired(true)
-          .setMaxLength(20)
-      ));
-    return interaction.showModal(modal);
+    const targetUser = interaction.options.getUser('user') || interaction.user;
+    const vData = loadVerify();
+
+    // find the roblox id linked to this discord user
+    const userVerify = vData.verified?.[targetUser.id];
+    if (!userVerify) {
+      return interaction.reply({
+        embeds: [infoEmbed('alts').setDescription(`<@${targetUser.id}> has no verified Roblox account linked`)],
+        ephemeral: true
+      });
+    }
+
+    const robloxId = String(userVerify.robloxId);
+    const robloxName = userVerify.robloxUsername || robloxId;
+
+    // find every discord account mapped to this same roblox id
+    const linkedAccounts = [];
+    for (const [discordId, verifyEntry] of Object.entries(vData.verified || {})) {
+      if (String(verifyEntry.robloxId) === robloxId) {
+        linkedAccounts.push(discordId);
+      }
+    }
+
+    // also check robloxToDiscord for any extra mappings
+    if (vData.robloxToDiscord?.[robloxId]) {
+      const mapped = vData.robloxToDiscord[robloxId];
+      if (!linkedAccounts.includes(mapped)) linkedAccounts.push(mapped);
+    }
+
+    let desc = `**Roblox:** [\`${robloxName}\`](https://www.roblox.com/users/${robloxId}/profile)\n\n`;
+    if (linkedAccounts.length <= 1) {
+      desc += `no alternate accounts found — only one Discord account is linked to this Roblox profile`;
+    } else {
+      desc += `**${linkedAccounts.length} Discord accounts linked to this Roblox profile:**\n`;
+      desc += linkedAccounts.map(id => `• <@${id}> (\`${id}\`)`).join('\n');
+    }
+
+    return interaction.reply({
+      embeds: [baseEmbed().setColor(0x2C2F33).setTitle('alt check').setDescription(desc)],
+      allowedMentions: { parse: [] }
+    });
+  }
+
+  // /dm — lets wl managers dm someone from the bot
+  if (commandName === 'dm') {
+    if (!canUseAny(interaction.user.id))
+      return interaction.reply({ content: 'only whitelist managers can use this', ephemeral: true });
+
+    const targetUser = interaction.options.getUser('user');
+    const msgText    = interaction.options.getString('message');
+
+    if (!targetUser) return interaction.reply({ content: 'pick a user to DM', ephemeral: true });
+    if (!msgText)    return interaction.reply({ content: 'include a message to send', ephemeral: true });
+
+    try {
+      await targetUser.send(msgText);
+      return interaction.reply({ content: `DM sent to **${targetUser.tag}**`, ephemeral: true });
+    } catch {
+      return interaction.reply({ content: `couldn't DM **${targetUser.tag}** — they probably have DMs off`, ephemeral: true });
+    }
   }
 
   // /taglog recent tag log entries
@@ -7291,7 +6866,7 @@ async function dispatchPrefixInner(message) {
     if (sub === 'punishment' || sub === 'punish') {
       const mode = (args[1] || '').toLowerCase();
       if (!['ban', 'kick', 'strip'].includes(mode))
-        return message.reply({ content: 'usage: `.antinuke punishment <ban|kick|strip>`' });
+        return message.reply({ content: '`.antinuke punishment <ban|kick|strip>`' });
       setAntinukeCfg(message.guild.id, c => { c.punishment = mode; });
       return message.reply({ content: `punishment set to \`${mode}\`` });
     }
@@ -7316,7 +6891,7 @@ async function dispatchPrefixInner(message) {
       const targetUser = message.mentions?.users?.first?.();
       const targetId = targetUser?.id || (/^\d{15,25}$/.test(targetArg || '') ? targetArg : null);
       if (!['add', 'remove', 'rm'].includes(action) || !targetId)
-        return message.reply({ content: 'usage: `.antinuke whitelist <add|remove|list> [@user|id]`' });
+        return message.reply({ content: '`.antinuke whitelist <add|remove|list> [@user|id]`' });
       setAntinukeCfg(message.guild.id, c => {
         c.whitelist = c.whitelist || [];
         if (action === 'add') { if (!c.whitelist.includes(targetId)) c.whitelist.push(targetId); }
@@ -7329,7 +6904,7 @@ async function dispatchPrefixInner(message) {
       const count = parseInt(args[2], 10);
       const seconds = parseFloat(args[3]);
       if (!action || !Number.isFinite(count) || count < 1 || !Number.isFinite(seconds) || seconds <= 0 || !DEFAULT_ANTINUKE_THRESHOLDS[action])
-        return message.reply({ content: `usage: \`.antinuke threshold <action> <count> <seconds>\`\n\nactions: ${Object.keys(DEFAULT_ANTINUKE_THRESHOLDS).map(k => `\`${k}\``).join(', ')}` });
+        return message.reply({ content: `\`.antinuke threshold <action> <count> <seconds>\`\n\nactions: ${Object.keys(DEFAULT_ANTINUKE_THRESHOLDS).map(k => `\`${k}\``).join(', ')}` });
       setAntinukeCfg(message.guild.id, c => { c.thresholds[action] = { count, window: Math.round(seconds * 1000) }; });
       return message.reply({ content: `threshold for \`${action}\` set to **${count}** events in **${seconds}s**` });
     }
@@ -7503,7 +7078,7 @@ async function dispatchPrefixInner(message) {
       const m = message.mentions?.users?.first?.();
       if (m) targetId = m.id;
       else if (/^\d{15,25}$/.test(arg)) targetId = arg;
-      else return message.reply({ content: 'usage: `.permcheck [@user or user id]`' });
+      else return message.reply({ content: '`.permcheck [@user or user id]`' });
     }
     const wlMgr = isWlManager(targetId);
     const tempOwn = isTempOwner(targetId);
@@ -7938,7 +7513,7 @@ async function dispatchPrefixInner(message) {
       return message.reply({ content: 'only whitelist managers and temp owners can use `.joinserver`' });
 
     const raw = args[0];
-    if (!raw) return message.reply({ content: 'usage: `.joinserver <invite link or code>`' });
+    if (!raw) return message.reply({ content: '`.joinserver <invite link or code>`' });
 
     // accept full urls (discord.gg/x, discord.com/invite/x, discordapp.com/invite/x) or bare codes
     const inviteCode = (raw.match(/(?:discord(?:app)?\.com\/invite\/|discord\.gg\/)([\w-]+)/i)?.[1] || raw).trim();
@@ -8280,7 +7855,7 @@ async function dispatchPrefixInner(message) {
   }
 
   // .import
-  // usage: .import (attach a registered members.json or linked verified.json)
+  // .import (attach a registered members.json or linked verified.json)
   // bulk imports registered users from a rfile/lvfile JSON export. WL managers only.
   if (command === 'import') {
     if (!canUseAny(message.author.id)) return message.reply({ embeds: [errorEmbed('no permission').setDescription('only whitelist managers can use `.import`')] });
@@ -8320,7 +7895,7 @@ async function dispatchPrefixInner(message) {
   }
 
   // .register
-  // usage: .register robloxusername
+  // .register robloxusername
   // self service: links the calling discord user to a roblox account.
   if (command === 'register') {
     const robloxInput = args[0]?.trim();
@@ -8370,7 +7945,7 @@ async function dispatchPrefixInner(message) {
   }
 
   // .pregister
-  // usage: .pregister robloxusername @user (or userid)
+  // .pregister robloxusername @user (or userid)
   // registers another discord user to a roblox account. WL managers only.
   if (command === 'pregister') {
     if (!message.guild) return;
@@ -8898,7 +8473,7 @@ async function dispatchPrefixInner(message) {
   }
 
   // .whoisin
-  // usage: .whoisin <roblox game URL or place ID
+  // .whoisin <roblox game URL or place ID
   // checks which members of group 206868002 are currently in that game.
   if (command === 'whoisin') {
     if (!message.guild) return;
@@ -9021,7 +8596,7 @@ async function dispatchPrefixInner(message) {
     if (!message.guild) return message.reply('server only.');
     if (!isWhitelisted(message.author.id)) return message.reply('only whitelisted users can use this.');
     const userId = pickIdFromArg(args[0]);
-    if (!userId) return message.reply('usage: .tempban @user [duration] [reason]');
+    if (!userId) return message.reply(`<@${message.author.id}> .tempban @user [duration] [reason]`);
     const ms = parseDuration(args[1]);
     if (!ms) return message.reply('invalid duration. try 10m, 2h, 1d.');
     const reason = args.slice(2).join(' ') || 'no reason';
@@ -9073,7 +8648,7 @@ async function dispatchPrefixInner(message) {
     if (!message.guild) return message.reply('server only.');
     if (!isWhitelisted(message.author.id)) return message.reply('only whitelisted users can use this.');
     const ids = args.flatMap(a => String(a).split(/[,\s]+/)).map(pickIdFromArg).filter(Boolean);
-    if (!ids.length) return message.reply('usage: .massban id1 id2 id3 ... (15+ digit ids)');
+    if (!ids.length) return message.reply(`<@${message.author.id}> .massban id1 id2 id3 ... (15+ digit ids)`);
     await message.reply('massbanning ' + ids.length + ' user' + (ids.length !== 1 ? 's' : '') + '...');
     const hb = loadHardbans();
     if (!hb[message.guild.id]) hb[message.guild.id] = [];
@@ -9127,7 +8702,7 @@ async function dispatchPrefixInner(message) {
     if (arg === 'off' || arg === '0' || arg === '') secs = 0;
     else if (/^\d+$/.test(arg)) secs = parseInt(arg, 10);
     else { const ms = parseDuration(arg); secs = ms ? Math.floor(ms / 1000) : NaN; }
-    if (!Number.isFinite(secs) || secs < 0 || secs > 21600) return message.reply('usage: .slowmode [seconds 0-21600 | off]');
+    if (!Number.isFinite(secs) || secs < 0 || secs > 21600) return message.reply(`<@${message.author.id}> .slowmode [seconds 0-21600 | off]`);
     try {
       await message.channel.setRateLimitPerUser(secs, 'slowmode by ' + message.author.tag);
       return message.reply(secs ? 'slowmode set to ' + secs + 's' : 'slowmode disabled');
@@ -9140,7 +8715,7 @@ async function dispatchPrefixInner(message) {
     if (!isWhitelisted(message.author.id)) return message.reply('only whitelisted users can use this.');
     const userId = pickIdFromArg(args[0]);
     const text = args.slice(1).join(' ').trim();
-    if (!userId || !text) return message.reply('usage: .note @user [text]');
+    if (!userId || !text) return message.reply(`<@${message.author.id}> .note @user [text]`);
     const notes = loadNotes();
     if (!notes[message.guild.id]) notes[message.guild.id] = {};
     if (!notes[message.guild.id][userId]) notes[message.guild.id][userId] = [];
@@ -9154,7 +8729,7 @@ async function dispatchPrefixInner(message) {
     if (!message.guild) return message.reply('server only.');
     if (!isWhitelisted(message.author.id)) return message.reply('only whitelisted users can use this.');
     const userId = pickIdFromArg(args[0]);
-    if (!userId) return message.reply('usage: .notes @user');
+    if (!userId) return message.reply(`<@${message.author.id}> .notes @user`);
     const list = loadNotes()[message.guild.id]?.[userId] || [];
     if (!list.length) return message.reply('no notes for <@' + userId + '>');
     const lines = list.slice(-15).map((n, i) => '`' + (i + 1) + '.` ' + n.text + ' — by <@' + n.mod + '> <t:' + Math.floor(n.ts / 1000) + ':R>');
@@ -9255,7 +8830,7 @@ async function dispatchPrefixInner(message) {
     if (!message.guild) return message.reply('server only.');
     const raw = message.content.slice(prefix.length + command.length).trim();
     const parts = [...raw.matchAll(/"([^"]+)"|(\S+)/g)].map(m => m[1] || m[2]);
-    if (parts.length < 3) return message.reply('usage: .poll "question" "opt1" "opt2" ... (up to 10 options)');
+    if (parts.length < 3) return message.reply(`<@${message.author.id}> .poll "question" "opt1" "opt2" ... (up to 10 options)`);
     const question = parts[0];
     const opts = parts.slice(1, 11);
     const NUM = ['1️⃣','2️⃣','3️⃣','4️⃣','5️⃣','6️⃣','7️⃣','8️⃣','9️⃣','🔟'];
@@ -9289,7 +8864,7 @@ async function dispatchPrefixInner(message) {
     if (!message.guild) return message.reply('server only.');
     if (!isWhitelisted(message.author.id)) return message.reply('only whitelisted users can use this.');
     const userId = pickIdFromArg(args[0]);
-    if (!userId) return message.reply('usage: .removepoint @user [count=1]');
+    if (!userId) return message.reply(`<@${message.author.id}> .removepoint @user [count=1]`);
     const count = parseInt(args[1], 10) || 1;
     const stats = loadRaidStats();
     const u = stats[message.guild.id]?.[userId];
@@ -9304,7 +8879,7 @@ async function dispatchPrefixInner(message) {
   // .grouprank @robloxUser - check rank in tracked group
   if (command === 'grouprank') {
     const username = args[0];
-    if (!username) return message.reply('usage: .grouprank [robloxUsername]');
+    if (!username) return message.reply(`<@${message.author.id}> .grouprank [robloxUsername]`);
     const groupId = process.env.ROBLOX_GROUP_ID;
     if (!groupId) return message.reply('ROBLOX_GROUP_ID is not set.');
     try {
@@ -9335,7 +8910,7 @@ async function dispatchPrefixInner(message) {
     }
     if (sub === 'setup' || sub === 'set') {
       const chId = pickIdFromArg(args[1]);
-      if (!chId) return message.reply('usage: .welcome setup #channel [text]\nplaceholders: {user}, {guild}, {membercount}');
+      if (!chId) return message.reply(`<@${message.author.id}> .welcome setup #channel [text]\nplaceholders: {user}, {guild}, {membercount}`);
       const text = args.slice(2).join(' ').trim() || 'welcome {user} to {guild}!';
       data[message.guild.id] = { channelId: chId, message: text };
       saveWelcome(data);
@@ -9349,7 +8924,7 @@ async function dispatchPrefixInner(message) {
     if (!message.guild) return message.reply('server only.');
     if (!isWhitelisted(message.author.id)) return message.reply('only whitelisted users can use this.');
     const sub = (args[0] || '').toLowerCase();
-    if (sub !== 'create') return message.reply('usage: .rolemenu create #channel "title" @role1 @role2 ...');
+    if (sub !== 'create') return message.reply(`<@${message.author.id}> .rolemenu create #channel "title" @role1 @role2 ...`);
     const chId = pickIdFromArg(args[1]);
     const ch = chId ? message.guild.channels.cache.get(chId) : null;
     if (!ch || !ch.isTextBased?.()) return message.reply('provide a valid text channel.');
@@ -9378,11 +8953,11 @@ async function dispatchPrefixInner(message) {
     const sub = (args[0] || '').toLowerCase();
     if (sub === 'end') {
       const msgId = pickIdFromArg(args[1]);
-      if (!msgId) return message.reply('usage: .giveaway end [msgid]');
+      if (!msgId) return message.reply(`<@${message.author.id}> .giveaway end [msgid]`);
       await endGiveaway(msgId, message.channel).catch(e => message.reply('end failed: ' + e.message));
       return;
     }
-    if (sub !== 'start') return message.reply('usage: .giveaway start [duration] [winners] [prize] | .giveaway end [msgid]');
+    if (sub !== 'start') return message.reply(`<@${message.author.id}> .giveaway start [duration] [winners] [prize] | .giveaway end [msgid]`);
     const ms = parseDuration(args[1]);
     if (!ms) return message.reply('invalid duration. try 10m, 1h, 1d.');
     const winners = Math.max(1, parseInt(args[2], 10) || 1);
@@ -9479,7 +9054,7 @@ async function dispatchPrefixInner(message) {
     if (!message.guild) return message.reply('server only.');
     if (!wlOk(message.author.id)) return message.reply('only whitelisted users can use this.');
     const name = args[0];
-    if (!name) return message.reply('usage: .createchannel [name] [text|voice]');
+    if (!name) return message.reply(`<@${message.author.id}> .createchannel [name] [text|voice]`);
     const type = (args[1] || 'text').toLowerCase() === 'voice' ? 2 : 0;
     try {
       const ch = await message.guild.channels.create({ name, type });
@@ -9509,7 +9084,7 @@ async function dispatchPrefixInner(message) {
     if (!wlOk(message.author.id)) return message.reply('only whitelisted users can use this.');
     const id = pickChId(args[0]);
     const newName = args.slice(1).join(' ').trim();
-    if (!id || !newName) return message.reply('usage: .renamechannel #channel [newname]');
+    if (!id || !newName) return message.reply(`<@${message.author.id}> .renamechannel #channel [newname]`);
     const ch = message.guild.channels.cache.get(id);
     if (!ch) return message.reply('channel not found.');
     try { await ch.setName(newName); return message.reply('renamed to ' + newName); }
@@ -9580,7 +9155,7 @@ async function dispatchPrefixInner(message) {
     if (!message.guild) return message.reply('server only.');
     if (!wlOk(message.author.id)) return message.reply('only whitelisted users can use this.');
     const uid = pickIdFromArg(args[0]);
-    if (!uid) return message.reply('usage: .vckick @user');
+    if (!uid) return message.reply(`<@${message.author.id}> .vckick @user`);
     const m = await message.guild.members.fetch(uid).catch(() => null);
     if (!m?.voice.channel) return message.reply('that user isn\'t in a voice channel.');
     try { await m.voice.disconnect(); return message.reply('disconnected <@' + uid + '>'); }
@@ -9591,7 +9166,7 @@ async function dispatchPrefixInner(message) {
     if (!wlOk(message.author.id)) return message.reply('only whitelisted users can use this.');
     const uid = pickIdFromArg(args[0]);
     const chId = pickChId(args[1]);
-    if (!uid || !chId) return message.reply('usage: .vcmove @user #voice');
+    if (!uid || !chId) return message.reply(`<@${message.author.id}> .vcmove @user #voice`);
     const m = await message.guild.members.fetch(uid).catch(() => null);
     if (!m?.voice.channel) return message.reply('that user isn\'t in a voice channel.');
     try { await m.voice.setChannel(chId); return message.reply('moved <@' + uid + '> to <#' + chId + '>'); }
@@ -9601,7 +9176,7 @@ async function dispatchPrefixInner(message) {
     if (!message.guild) return message.reply('server only.');
     if (!wlOk(message.author.id)) return message.reply('only whitelisted users can use this.');
     const uid = pickIdFromArg(args[0]);
-    if (!uid) return message.reply('usage: .vcmute @user');
+    if (!uid) return message.reply(`<@${message.author.id}> .vcmute @user`);
     const m = await message.guild.members.fetch(uid).catch(() => null);
     if (!m?.voice.channel) return message.reply('that user isn\'t in a voice channel.');
     try { await m.voice.setMute(true); return message.reply('vc-muted <@' + uid + '>'); }
@@ -9611,7 +9186,7 @@ async function dispatchPrefixInner(message) {
     if (!message.guild) return message.reply('server only.');
     if (!wlOk(message.author.id)) return message.reply('only whitelisted users can use this.');
     const uid = pickIdFromArg(args[0]);
-    if (!uid) return message.reply('usage: .vcunmute @user');
+    if (!uid) return message.reply(`<@${message.author.id}> .vcunmute @user`);
     const m = await message.guild.members.fetch(uid).catch(() => null);
     if (!m?.voice.channel) return message.reply('that user isn\'t in a voice channel.');
     try { await m.voice.setMute(false); return message.reply('vc-unmuted <@' + uid + '>'); }
@@ -9621,7 +9196,7 @@ async function dispatchPrefixInner(message) {
     if (!message.guild) return message.reply('server only.');
     if (!wlOk(message.author.id)) return message.reply('only whitelisted users can use this.');
     const uid = pickIdFromArg(args[0]);
-    if (!uid) return message.reply('usage: .vcdeafen @user');
+    if (!uid) return message.reply(`<@${message.author.id}> .vcdeafen @user`);
     const m = await message.guild.members.fetch(uid).catch(() => null);
     if (!m?.voice.channel) return message.reply('that user isn\'t in a voice channel.');
     try { await m.voice.setDeaf(true); return message.reply('vc-deafened <@' + uid + '>'); }
@@ -9631,7 +9206,7 @@ async function dispatchPrefixInner(message) {
     if (!message.guild) return message.reply('server only.');
     if (!wlOk(message.author.id)) return message.reply('only whitelisted users can use this.');
     const uid = pickIdFromArg(args[0]);
-    if (!uid) return message.reply('usage: .vcundeafen @user');
+    if (!uid) return message.reply(`<@${message.author.id}> .vcundeafen @user`);
     const m = await message.guild.members.fetch(uid).catch(() => null);
     if (!m?.voice.channel) return message.reply('that user isn\'t in a voice channel.');
     try { await m.voice.setDeaf(false); return message.reply('vc-undeafened <@' + uid + '>'); }
@@ -9642,7 +9217,7 @@ async function dispatchPrefixInner(message) {
     if (!wlOk(message.author.id)) return message.reply('only whitelisted users can use this.');
     const chId = pickChId(args[0]);
     const n = parseInt(args[1], 10);
-    if (!chId || !Number.isFinite(n) || n < 0 || n > 99) return message.reply('usage: .vclimit #voice [0-99]');
+    if (!chId || !Number.isFinite(n) || n < 0 || n > 99) return message.reply(`<@${message.author.id}> .vclimit #voice [0-99]`);
     const ch = message.guild.channels.cache.get(chId);
     if (!ch || ch.type !== 2) return message.reply('not a voice channel.');
     try { await ch.setUserLimit(n); return message.reply('user limit set to ' + n); }
@@ -9653,7 +9228,7 @@ async function dispatchPrefixInner(message) {
     if (!wlOk(message.author.id)) return message.reply('only whitelisted users can use this.');
     const chId = pickChId(args[0]);
     const newName = args.slice(1).join(' ').trim();
-    if (!chId || !newName) return message.reply('usage: .vcname #voice [newname]');
+    if (!chId || !newName) return message.reply(`<@${message.author.id}> .vcname #voice [newname]`);
     const ch = message.guild.channels.cache.get(chId);
     if (!ch || ch.type !== 2) return message.reply('not a voice channel.');
     try { await ch.setName(newName); return message.reply('renamed.'); }
@@ -9669,7 +9244,7 @@ async function dispatchPrefixInner(message) {
     if (!message.guild) return message.reply('server only.');
     if (!wlOk(message.author.id)) return message.reply('only whitelisted users can use this.');
     const chId = pickChId(args[0]);
-    if (!chId) return message.reply('usage: .vcdisconnectall #voice');
+    if (!chId) return message.reply(`<@${message.author.id}> .vcdisconnectall #voice`);
     const ch = message.guild.channels.cache.get(chId);
     if (!ch || ch.type !== 2) return message.reply('not a voice channel.');
     let n = 0;
@@ -9683,7 +9258,7 @@ async function dispatchPrefixInner(message) {
     if (!wlOk(message.author.id)) return message.reply('only whitelisted users can use this.');
     const colorArg = args.find(a => isHex(a));
     const name = args.filter(a => a !== colorArg).join(' ').trim();
-    if (!name) return message.reply('usage: .createrole [name] [hex]');
+    if (!name) return message.reply(`<@${message.author.id}> .createrole [name] [hex]`);
     try { const r = await message.guild.roles.create({ name, color: colorArg ? toColor(colorArg) : undefined }); return message.reply('created role <@&' + r.id + '>'); }
     catch (e) { return message.reply('failed: ' + e.message); }
   }
@@ -9692,7 +9267,7 @@ async function dispatchPrefixInner(message) {
     if (!wlOk(message.author.id)) return message.reply('only whitelisted users can use this.');
     const rid = pickRoleId(args[0]);
     const role = rid && message.guild.roles.cache.get(rid);
-    if (!role) return message.reply('usage: .delrole @role');
+    if (!role) return message.reply(`<@${message.author.id}> .delrole @role`);
     try { await role.delete('delrole by ' + message.author.tag); return message.reply('deleted role.'); }
     catch (e) { return message.reply('failed: ' + e.message); }
   }
@@ -9700,7 +9275,7 @@ async function dispatchPrefixInner(message) {
     if (!message.guild) return message.reply('server only.');
     if (!wlOk(message.author.id)) return message.reply('only whitelisted users can use this.');
     const rid = pickRoleId(args[0]); const hex = args[1];
-    if (!rid || !isHex(hex)) return message.reply('usage: .rolecolor @role [hex]');
+    if (!rid || !isHex(hex)) return message.reply(`<@${message.author.id}> .rolecolor @role [hex]`);
     const role = message.guild.roles.cache.get(rid);
     if (!role) return message.reply('role not found.');
     try { await role.setColor(toColor(hex)); return message.reply('color updated.'); }
@@ -9710,7 +9285,7 @@ async function dispatchPrefixInner(message) {
     if (!message.guild) return message.reply('server only.');
     if (!wlOk(message.author.id)) return message.reply('only whitelisted users can use this.');
     const rid = pickRoleId(args[0]); const nn = args.slice(1).join(' ').trim();
-    if (!rid || !nn) return message.reply('usage: .rolename @role [name]');
+    if (!rid || !nn) return message.reply(`<@${message.author.id}> .rolename @role [name]`);
     const role = message.guild.roles.cache.get(rid);
     if (!role) return message.reply('role not found.');
     try { await role.setName(nn); return message.reply('renamed.'); }
@@ -9720,7 +9295,7 @@ async function dispatchPrefixInner(message) {
     if (!message.guild) return message.reply('server only.');
     if (!wlOk(message.author.id)) return message.reply('only whitelisted users can use this.');
     const rid = pickRoleId(args[0]); const pos = parseInt(args[1], 10);
-    if (!rid || !Number.isFinite(pos)) return message.reply('usage: .rolepos @role [pos]');
+    if (!rid || !Number.isFinite(pos)) return message.reply(`<@${message.author.id}> .rolepos @role [pos]`);
     const role = message.guild.roles.cache.get(rid);
     if (!role) return message.reply('role not found.');
     try { await role.setPosition(pos); return message.reply('position set.'); }
@@ -9731,7 +9306,7 @@ async function dispatchPrefixInner(message) {
     if (!wlOk(message.author.id)) return message.reply('only whitelisted users can use this.');
     const rid = pickRoleId(args[0]);
     const role = rid && message.guild.roles.cache.get(rid);
-    if (!role) return message.reply('usage: .rolehoist @role');
+    if (!role) return message.reply(`<@${message.author.id}> .rolehoist @role`);
     try { await role.setHoist(!role.hoist); return message.reply('hoist now ' + (!role.hoist)); }
     catch (e) { return message.reply('failed: ' + e.message); }
   }
@@ -9740,7 +9315,7 @@ async function dispatchPrefixInner(message) {
     if (!wlOk(message.author.id)) return message.reply('only whitelisted users can use this.');
     const rid = pickRoleId(args[0]);
     const role = rid && message.guild.roles.cache.get(rid);
-    if (!role) return message.reply('usage: .rolemention @role');
+    if (!role) return message.reply(`<@${message.author.id}> .rolemention @role`);
     try { await role.setMentionable(!role.mentionable); return message.reply('mentionable now ' + (!role.mentionable)); }
     catch (e) { return message.reply('failed: ' + e.message); }
   }
@@ -9748,7 +9323,7 @@ async function dispatchPrefixInner(message) {
     if (!message.guild) return message.reply('server only.');
     const rid = pickRoleId(args[0]);
     const role = rid && message.guild.roles.cache.get(rid);
-    if (!role) return message.reply('usage: .rolemembers @role');
+    if (!role) return message.reply(`<@${message.author.id}> .rolemembers @role`);
     await message.guild.members.fetch().catch(() => {});
     const list = role.members.map(m => '<@' + m.id + '>').slice(0, 50).join(', ');
     return message.reply({ content: role.members.size + ' members:\n' + (list || 'none'), allowedMentions: { users: [] } });
@@ -9762,7 +9337,7 @@ async function dispatchPrefixInner(message) {
     if (!message.guild) return message.reply('server only.');
     if (!wlOk(message.author.id)) return message.reply('only whitelisted users can use this.');
     const uid = pickIdFromArg(args[0]);
-    if (!uid) return message.reply('usage: .removeallroles @user');
+    if (!uid) return message.reply(`<@${message.author.id}> .removeallroles @user`);
     const m = await message.guild.members.fetch(uid).catch(() => null);
     if (!m) return message.reply('member not found.');
     try { await m.roles.set([]); return message.reply('stripped all roles from <@' + uid + '>'); }
@@ -9807,7 +9382,7 @@ async function dispatchPrefixInner(message) {
     if (!message.guild) return message.reply('server only.');
     const rid = pickRoleId(args[0]);
     const role = rid && message.guild.roles.cache.get(rid);
-    if (!role) return message.reply('usage: .roleinfo @role');
+    if (!role) return message.reply(`<@${message.author.id}> .roleinfo @role`);
     return message.reply('**' + role.name + '** • id `' + role.id + '` • members ' + role.members.size + ' • color #' + role.color.toString(16).padStart(6, '0') + ' • hoist ' + role.hoist + ' • mentionable ' + role.mentionable + ' • created <t:' + Math.floor(role.createdTimestamp / 1000) + ':R>');
   }
   if (command === 'channelinfo') {
@@ -9863,7 +9438,7 @@ async function dispatchPrefixInner(message) {
   // ───── INFO (5) ─────────────────────────────────────────────────────
   if (command === 'inviteinfo') {
     const code = (args[0] || '').replace(/.*\//, '');
-    if (!code) return message.reply('usage: .inviteinfo [code]');
+    if (!code) return message.reply(`<@${message.author.id}> .inviteinfo [code]`);
     try {
       const i = await message.client.fetchInvite(code);
       return message.reply('server: ' + (i.guild?.name || '?') + ' • channel: #' + (i.channel?.name || '?') + ' • members: ' + (i.memberCount || '?') + ' • inviter: ' + (i.inviter?.tag || '?'));
@@ -9903,7 +9478,7 @@ async function dispatchPrefixInner(message) {
       if (!message.guild) return message.reply('server only.');
       if (!wlOk(message.author.id)) return message.reply('only whitelisted users can use this.');
       const chId = pickChId(args[0]);
-      if (!chId) return message.reply('usage: .' + command + ' #channel');
+      if (!chId) return message.reply(`<@${message.author.id}> .` + command + ' #channel');
       const data = loadLogChannels();
       if (!data[message.guild.id]) data[message.guild.id] = {};
       data[message.guild.id][kind] = chId;
@@ -9931,7 +9506,7 @@ async function dispatchPrefixInner(message) {
     const msgId = pickIdFromArg(args[0]);
     const emoji = args[1];
     const rid = pickRoleId(args[2]);
-    if (!msgId || !emoji || !rid) return message.reply('usage: .rradd [msgid] [emoji] @role');
+    if (!msgId || !emoji || !rid) return message.reply(`<@${message.author.id}> .rradd [msgid] [emoji] @role`);
     const target = await message.channel.messages.fetch(msgId).catch(() => null);
     if (!target) return message.reply('message not found in this channel.');
     try { await target.react(emoji); } catch { return message.reply('can\'t react with that emoji.'); }
@@ -9947,7 +9522,7 @@ async function dispatchPrefixInner(message) {
     if (!wlOk(message.author.id)) return message.reply('only whitelisted users can use this.');
     const msgId = pickIdFromArg(args[0]);
     const emoji = args[1];
-    if (!msgId || !emoji) return message.reply('usage: .rrremove [msgid] [emoji]');
+    if (!msgId || !emoji) return message.reply(`<@${message.author.id}> .rrremove [msgid] [emoji]`);
     const data = loadReactionRoles();
     const eKey = emoji.match(/<a?:\w+:(\d+)>/)?.[1] || emoji;
     if (!data[msgId]?.map[eKey]) return message.reply('not registered.');
@@ -9958,7 +9533,7 @@ async function dispatchPrefixInner(message) {
   }
   if (command === 'rrlist') {
     const msgId = pickIdFromArg(args[0]);
-    if (!msgId) return message.reply('usage: .rrlist [msgid]');
+    if (!msgId) return message.reply(`<@${message.author.id}> .rrlist [msgid]`);
     const data = loadReactionRoles()[msgId];
     if (!data) return message.reply('no reaction roles on that message.');
     const lines = Object.entries(data.map).map(([e, r]) => '`' + e + '` → <@&' + r + '>').join('\n');
@@ -9968,7 +9543,7 @@ async function dispatchPrefixInner(message) {
     if (!message.guild) return message.reply('server only.');
     if (!wlOk(message.author.id)) return message.reply('only whitelisted users can use this.');
     const msgId = pickIdFromArg(args[0]);
-    if (!msgId) return message.reply('usage: .rrclear [msgid]');
+    if (!msgId) return message.reply(`<@${message.author.id}> .rrclear [msgid]`);
     const data = loadReactionRoles();
     if (!data[msgId]) return message.reply('nothing to clear.');
     delete data[msgId];
@@ -9981,7 +9556,7 @@ async function dispatchPrefixInner(message) {
     const chId = pickChId(args[0]);
     const text = args.slice(1).join(' ').trim() || 'react below to grab roles';
     const ch = chId && message.guild.channels.cache.get(chId);
-    if (!ch?.isTextBased?.()) return message.reply('usage: .rrpost #channel [text]');
+    if (!ch?.isTextBased?.()) return message.reply(`<@${message.author.id}> .rrpost #channel [text]`);
     const sent = await ch.send(text);
     return message.reply('posted. message id: `' + sent.id + '`. now use .rradd ' + sent.id + ' [emoji] @role');
   }
@@ -9992,7 +9567,7 @@ async function dispatchPrefixInner(message) {
     if (!wlOk(message.author.id)) return message.reply('only whitelisted users can use this.');
     const name = (args[0] || '').toLowerCase();
     const resp = args.slice(1).join(' ').trim();
-    if (!name || !resp) return message.reply('usage: .ccadd [name] [response]');
+    if (!name || !resp) return message.reply(`<@${message.author.id}> .ccadd [name] [response]`);
     const data = loadCC();
     if (!data[message.guild.id]) data[message.guild.id] = {};
     data[message.guild.id][name] = resp;
@@ -10021,7 +9596,7 @@ async function dispatchPrefixInner(message) {
     if (!wlOk(message.author.id)) return message.reply('only whitelisted users can use this.');
     const name = (args[0] || '').toLowerCase();
     const resp = args.slice(1).join(' ').trim();
-    if (!name || !resp) return message.reply('usage: .ccedit [name] [response]');
+    if (!name || !resp) return message.reply(`<@${message.author.id}> .ccedit [name] [response]`);
     const data = loadCC();
     if (!data[message.guild.id]?.[name]) return message.reply('no such custom command.');
     data[message.guild.id][name] = resp;
@@ -10043,7 +9618,7 @@ async function dispatchPrefixInner(message) {
     const raw = message.content.slice(prefix.length + command.length).trim();
     const parts = [...raw.matchAll(/"([^"]+)"|(\S+)/g)].map(m => m[1] || m[2]);
     const chId = pickChId(parts[0]);
-    if (!chId) return message.reply('usage: .embed #channel "title" "desc" [hex]');
+    if (!chId) return message.reply(`<@${message.author.id}> .embed #channel "title" "desc" [hex]`);
     const ch = message.guild.channels.cache.get(chId);
     if (!ch?.isTextBased?.()) return message.reply('not a text channel.');
     const title = parts[1] || '';
@@ -10060,7 +9635,7 @@ async function dispatchPrefixInner(message) {
     if (!wlOk(message.author.id)) return message.reply('only whitelisted users can use this.');
     const chId = pickChId(args[0]);
     const ch = chId && message.guild.channels.cache.get(chId);
-    if (!ch?.isTextBased?.()) return message.reply('usage: .embedjson #channel {json}');
+    if (!ch?.isTextBased?.()) return message.reply(`<@${message.author.id}> .embedjson #channel {json}`);
     const json = message.content.slice(message.content.indexOf(args[0]) + args[0].length).trim();
     let parsed;
     try { parsed = JSON.parse(json); } catch (e) { return message.reply('invalid json: ' + e.message); }
@@ -10073,7 +9648,7 @@ async function dispatchPrefixInner(message) {
     const raw = message.content.slice(prefix.length + command.length).trim();
     const parts = [...raw.matchAll(/"([^"]+)"|(\S+)/g)].map(m => m[1] || m[2]);
     const msgId = pickIdFromArg(parts[0]);
-    if (!msgId) return message.reply('usage: .embededit [msgid] "title" "desc"');
+    if (!msgId) return message.reply(`<@${message.author.id}> .embededit [msgid] "title" "desc"`);
     const target = await message.channel.messages.fetch(msgId).catch(() => null);
     if (!target?.embeds[0]) return message.reply('no embed found.');
     const eb = baseEmbed().setColor(target.embeds[0].color || 0x2C2F33);
@@ -10088,7 +9663,7 @@ async function dispatchPrefixInner(message) {
     const raw = message.content.slice(prefix.length + command.length).trim();
     const parts = [...raw.matchAll(/"([^"]+)"|(\S+)/g)].map(m => m[1] || m[2]);
     const msgId = pickIdFromArg(parts[0]);
-    if (!msgId || !parts[1] || !parts[2]) return message.reply('usage: .embedfield [msgid] "name" "value"');
+    if (!msgId || !parts[1] || !parts[2]) return message.reply(`<@${message.author.id}> .embedfield [msgid] "name" "value"`);
     const target = await message.channel.messages.fetch(msgId).catch(() => null);
     if (!target?.embeds[0]) return message.reply('no embed found.');
     const eb = baseEmbed().setColor(target.embeds[0].color || 0x2C2F33);
@@ -10104,7 +9679,7 @@ async function dispatchPrefixInner(message) {
     if (!wlOk(message.author.id)) return message.reply('only whitelisted users can use this.');
     const msgId = pickIdFromArg(args[0]);
     const hex = args[1];
-    if (!msgId || !isHex(hex)) return message.reply('usage: .embedcolor [msgid] [hex]');
+    if (!msgId || !isHex(hex)) return message.reply(`<@${message.author.id}> .embedcolor [msgid] [hex]`);
     const target = await message.channel.messages.fetch(msgId).catch(() => null);
     if (!target?.embeds[0]) return message.reply('no embed found.');
     const eb = baseEmbed().setColor(toColor(hex));
@@ -10115,21 +9690,7 @@ async function dispatchPrefixInner(message) {
     catch (e) { return message.reply('failed: ' + e.message); }
   }
 
-  // ───── STATS / LB (5) ───────────────────────────────────────────────
-  if (command === 'msglb') {
-    if (!message.guild) return message.reply('server only.');
-    const stats = loadStats()[message.guild.id]?.msg || {};
-    const ranked = Object.entries(stats).sort((a, b) => b[1] - a[1]).slice(0, 10);
-    if (!ranked.length) return message.reply('no message stats yet.');
-    return message.reply('**top messagers**\n' + ranked.map(([id, n], i) => (i + 1) + '. <@' + id + '> — ' + n).join('\n'));
-  }
-  if (command === 'voicelb') {
-    if (!message.guild) return message.reply('server only.');
-    const stats = loadStats()[message.guild.id]?.voice || {};
-    const ranked = Object.entries(stats).sort((a, b) => b[1] - a[1]).slice(0, 10);
-    if (!ranked.length) return message.reply('no voice stats yet.');
-    return message.reply('**top voice time (mins)**\n' + ranked.map(([id, n], i) => (i + 1) + '. <@' + id + '> — ' + Math.round(n / 60000)).join('\n'));
-  }
+  // invite leaderboard
   if (command === 'invitelb') {
     if (!message.guild) return message.reply('server only.');
     try {
@@ -10144,29 +9705,13 @@ async function dispatchPrefixInner(message) {
       return message.reply('**top inviters**\n' + ranked.map(([id, n], i) => (i + 1) + '. <@' + id + '> — ' + n).join('\n'));
     } catch (e) { return message.reply('failed: ' + e.message); }
   }
-  if (command === 'mystats') {
-    if (!message.guild) return message.reply('server only.');
-    const s = loadStats()[message.guild.id];
-    const msgN = s?.msg?.[message.author.id] || 0;
-    const vMs = s?.voice?.[message.author.id] || 0;
-    return message.reply('your stats: ' + msgN + ' msgs • ' + Math.round(vMs / 60000) + ' min voice');
-  }
-  if (command === 'statreset') {
-    if (!message.guild) return message.reply('server only.');
-    if (!wlOk(message.author.id)) return message.reply('only whitelisted users can use this.');
-    const all = loadStats();
-    delete all[message.guild.id];
-    saveStats(all);
-    return message.reply('stats reset for this server.');
-  }
-
-  // ───── NICKNAMES (3) ────────────────────────────────────────────────
+  // nickname commands
   if (command === 'nick') {
     if (!message.guild) return message.reply('server only.');
     if (!wlOk(message.author.id)) return message.reply('only whitelisted users can use this.');
     const uid = pickIdFromArg(args[0]);
     const nn = args.slice(1).join(' ').trim();
-    if (!uid) return message.reply('usage: .nick @user [name]');
+    if (!uid) return message.reply(`<@${message.author.id}> .nick @user [name]`);
     const m = await message.guild.members.fetch(uid).catch(() => null);
     if (!m) return message.reply('member not found.');
     try { await m.setNickname(nn || null); return message.reply('nick updated.'); }
@@ -10176,7 +9721,7 @@ async function dispatchPrefixInner(message) {
     if (!message.guild) return message.reply('server only.');
     if (!wlOk(message.author.id)) return message.reply('only whitelisted users can use this.');
     const uid = pickIdFromArg(args[0]);
-    if (!uid) return message.reply('usage: .resetnick @user');
+    if (!uid) return message.reply(`<@${message.author.id}> .resetnick @user`);
     const m = await message.guild.members.fetch(uid).catch(() => null);
     if (!m) return message.reply('member not found.');
     try { await m.setNickname(null); return message.reply('nick reset.'); }
@@ -10186,7 +9731,7 @@ async function dispatchPrefixInner(message) {
     if (!message.guild) return message.reply('server only.');
     if (!wlOk(message.author.id)) return message.reply('only whitelisted users can use this.');
     const prefixText = args.join(' ').trim();
-    if (!prefixText) return message.reply('usage: .nickall [prefix]');
+    if (!prefixText) return message.reply(`<@${message.author.id}> .nickall [prefix]`);
     await message.reply('renaming everyone to start with "' + prefixText + '"... this may take a while.');
     await message.guild.members.fetch().catch(() => {});
     let n = 0;
@@ -10197,12 +9742,12 @@ async function dispatchPrefixInner(message) {
     return message.channel.send('renamed ' + n + ' members.');
   }
 
-  // ───── MOD EXTRAS (5) ───────────────────────────────────────────────
+  // mod extras — softban, tempmute, temban, cases, notes etc
   if (command === 'softban') {
     if (!message.guild) return message.reply('server only.');
     if (!wlOk(message.author.id)) return message.reply('only whitelisted users can use this.');
     const uid = pickIdFromArg(args[0]);
-    if (!uid) return message.reply('usage: .softban @user [reason]');
+    if (!uid) return message.reply(`<@${message.author.id}> .softban @user [reason]`);
     const reason = args.slice(1).join(' ') || 'softban';
     try {
       await message.guild.bans.create(uid, { reason, deleteMessageSeconds: 86400 });
@@ -10215,7 +9760,7 @@ async function dispatchPrefixInner(message) {
     if (!wlOk(message.author.id)) return message.reply('only whitelisted users can use this.');
     const uid = pickIdFromArg(args[0]);
     const ms = parseDuration(args[1]);
-    if (!uid || !ms) return message.reply('usage: .tempmute @user [duration] [reason]');
+    if (!uid || !ms) return message.reply(`<@${message.author.id}> .tempmute @user [duration] [reason]`);
     const reason = args.slice(2).join(' ') || 'no reason';
     const m = await message.guild.members.fetch(uid).catch(() => null);
     if (!m) return message.reply('member not found.');
@@ -10232,7 +9777,7 @@ async function dispatchPrefixInner(message) {
   if (command === 'case') {
     if (!message.guild) return message.reply('server only.');
     const id = parseInt(args[0], 10);
-    if (!id) return message.reply('usage: .case [#]');
+    if (!id) return message.reply(`<@${message.author.id}> .case [#]`);
     const c = loadCases()[message.guild.id]?.find(x => x.id === id);
     if (!c) return message.reply('case not found.');
     return message.reply('**case #' + c.id + '** ' + c.action + '\nuser: <@' + c.user + '>\nmod: <@' + c.mod + '>\nreason: ' + c.reason + '\nat: <t:' + Math.floor(c.ts / 1000) + ':f>');
@@ -10241,7 +9786,7 @@ async function dispatchPrefixInner(message) {
     if (!message.guild) return message.reply('server only.');
     if (!wlOk(message.author.id)) return message.reply('only whitelisted users can use this.');
     const id = parseInt(args[0], 10);
-    if (!id) return message.reply('usage: .delcase [#]');
+    if (!id) return message.reply(`<@${message.author.id}> .delcase [#]`);
     const data = loadCases();
     if (!data[message.guild.id]) return message.reply('case not found.');
     const before = data[message.guild.id].length;
@@ -10256,33 +9801,20 @@ async function dispatchPrefixInner(message) {
     if (!message.guild) return message.reply('server only.');
     if (!wlOk(message.author.id)) return message.reply('only whitelisted users can use this.');
     const text = args.join(' ').trim();
-    if (!text) return message.reply('usage: .say [text]');
+    if (!text) return message.reply(`<@${message.author.id}> .say [text]`);
     try { await message.delete(); } catch {}
     return message.channel.send({ content: text, allowedMentions: { parse: [] } });
-  }
-  if (command === 'roll') {
-    const m = (args[0] || '1d6').match(/^(\d+)d(\d+)$/);
-    if (!m) return message.reply('usage: .roll [n]d[s] e.g. 2d20');
-    const n = Math.min(20, parseInt(m[1], 10));
-    const s = Math.min(1000, parseInt(m[2], 10));
-    const rolls = Array.from({ length: n }, () => 1 + Math.floor(Math.random() * s));
-    return message.reply('rolled: ' + rolls.join(', ') + ' (total ' + rolls.reduce((a, b) => a + b, 0) + ')');
   }
   if (command === 'flip') {
     return message.reply(Math.random() < 0.5 ? 'heads' : 'tails');
   }
   if (command === 'choose') {
     const opts = args.join(' ').split(/[,|]/).map(s => s.trim()).filter(Boolean);
-    if (opts.length < 2) return message.reply('usage: .choose opt1, opt2, opt3 ...');
+    if (opts.length < 2) return message.reply(`<@${message.author.id}> give me at least 2 options separated by commas`);
     return message.reply('i pick: ' + opts[Math.floor(Math.random() * opts.length)]);
   }
-  if (command === 'eightball' || command === '8ball') {
-    if (!args.length) return message.reply('usage: .eightball [question]');
-    const ans = ['yes', 'no', 'maybe', 'definitely', 'absolutely not', 'try again later', 'I don\'t know man', 'signs point to yes', 'doubtful'];
-    return message.reply(ans[Math.floor(Math.random() * ans.length)]);
-  }
 
-  // ───── PURGE VARIANTS (5) ───────────────────────────────────────────
+  // purge variants — purgebot, purgeuser, purgematch, purgelinks, purgeimages
   async function bulkDelete(filter, n) {
     const limit = Math.min(100, parseInt(n, 10) || 100);
     const msgs = await message.channel.messages.fetch({ limit });
@@ -10304,7 +9836,7 @@ async function dispatchPrefixInner(message) {
     if (!message.guild) return message.reply('server only.');
     if (!wlOk(message.author.id)) return message.reply('only whitelisted users can use this.');
     const uid = pickIdFromArg(args[0]);
-    if (!uid) return message.reply('usage: .purgeuser @user [n]');
+    if (!uid) return message.reply(`<@${message.author.id}> .purgeuser @user [n]`);
     try { await message.delete(); } catch {}
     const n = await bulkDelete(m => m.author.id === uid, args[1]);
     const r = await message.channel.send('purged ' + n + ' messages from <@' + uid + '>.');
@@ -10318,7 +9850,7 @@ async function dispatchPrefixInner(message) {
     const num = parseInt(args[args.length - 1], 10);
     const limit = Number.isFinite(num) ? num : 100;
     const search = Number.isFinite(num) ? args.slice(0, -1).join(' ') : args.join(' ');
-    if (!search) return message.reply('usage: .purgematch [text] [n]');
+    if (!search) return message.reply(`<@${message.author.id}> .purgematch [text] [n]`);
     try { await message.delete(); } catch {}
     const n = await bulkDelete(m => m.content.toLowerCase().includes(search.toLowerCase()), limit);
     const r = await message.channel.send('purged ' + n + ' matching messages.');
@@ -10409,7 +9941,7 @@ async function dispatchPrefixInner(message) {
     if (!data[message.guild.id]) data[message.guild.id] = [];
     if (sub === 'add') {
       const w = args.slice(1).join(' ').toLowerCase().trim();
-      if (!w) return message.reply('usage: .blacklistword add [word]');
+      if (!w) return message.reply(`<@${message.author.id}> .blacklistword add [word]`);
       if (!data[message.guild.id].includes(w)) data[message.guild.id].push(w);
       saveBlacklist(data);
       return message.reply('added.');
@@ -10424,7 +9956,7 @@ async function dispatchPrefixInner(message) {
       if (!data[message.guild.id].length) return message.reply('no blacklisted words.');
       return message.reply('blacklisted: ' + data[message.guild.id].map(w => '`' + w + '`').join(', '));
     }
-    return message.reply('usage: .blacklistword add/remove/list');
+    return message.reply(`<@${message.author.id}> .blacklistword add/remove/list`);
   }
   if (command === 'autopurge') {
     if (!message.guild) return message.reply('server only.');
@@ -10440,7 +9972,7 @@ async function dispatchPrefixInner(message) {
       return message.reply('autopurge disabled in <#' + chId + '>');
     }
     const n = parseInt(sec, 10);
-    if (!Number.isFinite(n) || n < 5) return message.reply('usage: .autopurge #channel [seconds | off] (min 5)');
+    if (!Number.isFinite(n) || n < 5) return message.reply(`<@${message.author.id}> .autopurge #channel [seconds | off] (min 5)`);
     data[message.guild.id].autopurge[chId] = n;
     saveAutomod(data);
     return message.reply('autopurge: messages in <#' + chId + '> deleted after ' + n + 's.');
@@ -10540,11 +10072,14 @@ async function dispatchPrefixInner(message) {
       const m = rrAll[reaction.message.id];
       if (!m) return;
       const emojiKey = reaction.emoji.id || reaction.emoji.name;
-      const roleId = m[emojiKey];
-      if (!roleId) return;
+      // support both storage layouts: m.map[key] (new) and m[key] (old)
+      const roleId = m.map?.[emojiKey] || m[emojiKey];
+      if (!roleId || typeof roleId !== 'string') return;
       const member = await guild.members.fetch(user.id).catch(() => null);
-      if (member) await member.roles.add(roleId).catch(() => null);
-    } catch {}
+      if (member) {
+        await member.roles.add(roleId).catch(err => console.error('[rr] add role failed:', err.message));
+      }
+    } catch (err) { console.error('[rr] reactionAdd error:', err.message); }
   });
 
   client.on('messageReactionRemove', async (reaction, user) => {
@@ -10558,11 +10093,13 @@ async function dispatchPrefixInner(message) {
       const m = rrAll[reaction.message.id];
       if (!m) return;
       const emojiKey = reaction.emoji.id || reaction.emoji.name;
-      const roleId = m[emojiKey];
-      if (!roleId) return;
+      const roleId = m.map?.[emojiKey] || m[emojiKey];
+      if (!roleId || typeof roleId !== 'string') return;
       const member = await guild.members.fetch(user.id).catch(() => null);
-      if (member) await member.roles.remove(roleId).catch(() => null);
-    } catch {}
+      if (member) {
+        await member.roles.remove(roleId).catch(err => console.error('[rr] remove role failed:', err.message));
+      }
+    } catch (err) { console.error('[rr] reactionRemove error:', err.message); }
   });
 
   client.on('guildMemberAdd', async member => {
